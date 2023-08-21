@@ -1,8 +1,10 @@
 from django.core.cache import cache
+from rest_framework.permissions import IsAdminUser
 
 from utility.permissions import IsAdminOrReadOnly
 
-from .models import Product
+from .models import Product, ProductMedia
+from .serializers import ProductMediaSerializer
 
 
 class ProductAPIViewMixin:
@@ -24,3 +26,9 @@ class ProductAPIViewMixin:
             key=cache_key, default=queryset, timeout=None
         )
         return cached_queryset
+
+
+class ProductMediaAPIViewMixin:
+    queryset = ProductMedia.objects.select_related("product")
+    serializer_class = ProductMediaSerializer
+    permission_classes = (IsAdminUser,)

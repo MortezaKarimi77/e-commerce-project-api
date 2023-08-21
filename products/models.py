@@ -282,9 +282,15 @@ class ProductMedia(LifecycleModelMixin, models.Model):
         return f"{self.product} | {self.file}"
 
     def get_upload_path(self, filename):
-        category = self.product.category.url.replace("-", " ").strip()
+        category = self.product.category.media_folder_name
         product = self.product.url.replace("-", " ").strip()
         return f"products/{category}/{product}/{filename}"
+
+    def get_absolute_url(self):
+        return reverse(
+            "products:product_media_detail_update_delete",
+            kwargs={"product_media_id": self.id},
+        )
 
     # hooks
     @hook(BEFORE_UPDATE, when="file", has_changed=True)

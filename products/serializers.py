@@ -15,6 +15,41 @@ class ProductMediaSerializer(serializers.ModelSerializer):
         model = ProductMedia
         fields = "__all__"
 
+        extra_kwargs = {
+            "product": {
+                "write_only": True,
+            },
+            "type": {
+                "write_only": True,
+            },
+        }
+
+    # methods
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        user = self.context["request"].user
+
+        if not user.is_staff:
+            representation.pop("id", None)
+            representation.pop("product_name", None)
+            representation.pop("absolute_url", None)
+
+        return representation
+
+    # fields
+    type_name = serializers.CharField(
+        source="get_type_display",
+        read_only=True,
+    )
+    product_name = serializers.CharField(
+        source="product.name",
+        read_only=True,
+    )
+    absolute_url = serializers.CharField(
+        source="get_absolute_url",
+        read_only=True,
+    )
+
 
 class PublicProductListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -178,6 +213,7 @@ class ProductDetailSerializer(ProductSerializer):
         representation.move_to_end("absolute_url")
         representation.move_to_end("brand_info")
         representation.move_to_end("category_info")
+        representation.move_to_end("media_files")
 
         if not user.is_staff:
             representation.pop("create_datetime", None)
@@ -222,4 +258,8 @@ class ProductDetailSerializer(ProductSerializer):
     )
     category_info = serializers.SerializerMethodField(
         method_name="get_category_info",
+    )
+    media_files = ProductMediaSerializer(
+        many=True,
+        read_only=True,
     )

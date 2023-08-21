@@ -14,4 +14,14 @@ urlpatterns = [
         view=views.ProductDetailUpdateDelete.as_view(),
         name="product_detail_update_delete",
     ),
+    path(
+        route="product-media-list-create/",
+        view=views.ProductMediaListCreate.as_view(),
+        name="product_media_list_create",
+    ),
+    path(
+        route="product-media-detail-update-delete/<product_media_id>/",
+        view=views.ProductMediaDetailUpdateDelete.as_view(),
+        name="product_media_detail_update_delete",
+    ),
 ]
