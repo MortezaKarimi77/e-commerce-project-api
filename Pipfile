@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+djangorestframework = "*"
+markdown = "*"
+django-filter = "*"
+djangorestframework-simplejwt = "*"
+pillow = "*"
+drf-spectacular = "*"
+django-lifecycle = "*"
+
+[dev-packages]
+django-debug-toolbar = "*"
+
+[requires]
+python_version = "3.11"
