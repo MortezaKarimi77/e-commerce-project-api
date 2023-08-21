@@ -91,9 +91,10 @@ class Product(LifecycleModelMixin, TimeStamp):
     @hook(AFTER_SAVE)
     @hook(AFTER_DELETE)
     def clear_cache(self):
-        cache.delete(key="brand_products")
         cache.delete(key="all_products")
         cache.delete(key="visible_products")
+        cache.delete(key="brand_products")
+        cache.delete(key=f"product_{self.url}")
         cache.delete(key=f"category_{self.category.id}_products")
 
     # fields
