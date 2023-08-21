@@ -7,6 +7,10 @@ class ProductManager(models.Manager):
         queryset = queryset.select_related("brand", "category")
         return queryset
 
+    def get_visible_products(self):
+        visible_products = self.filter(is_visible=True)
+        return visible_products
+
     def get_brand_products(self, brand_url):
         brand_products = self.filter(brand__url=brand_url)
         return brand_products
