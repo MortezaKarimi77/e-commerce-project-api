@@ -16,11 +16,11 @@ class ProductDetailUpdateDelete(ProductAPIViewMixin, RetrieveUpdateDestroyAPIVie
     # http_method_names = ("get", "patch", "delete")
 
     def get_object(self):
-        category_url = self.kwargs["category_id"]
+        category_id = self.kwargs["category_id"]
         product_url = self.kwargs["product_url"]
         queryset = self.get_queryset()
 
         product = get_object_or_404(
-            klass=queryset, category__id=category_url, url=product_url
+            klass=queryset, category__id=category_id, url=product_url
         )
         return product
