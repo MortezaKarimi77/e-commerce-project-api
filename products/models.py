@@ -50,7 +50,7 @@ class TimeStamp(models.Model):
 
 class Product(LifecycleModelMixin, TimeStamp):
     class Meta:
-        ordering = ("-is_available", "-id")
+        ordering = ("-is_visible", "-is_available", "-id")
         db_table = "product"
 
     objects = ProductManager()
