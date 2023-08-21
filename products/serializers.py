@@ -105,6 +105,7 @@ class ProductListSerializer(ProductSerializer):
             "category",
             "category_full_name",
             "brand",
+            "brand_name",
             "introduction",
             "review",
             "meta_title",
@@ -162,6 +163,10 @@ class ProductListSerializer(ProductSerializer):
         source="category.full_name",
         read_only=True,
     )
+    brand_name = serializers.CharField(
+        source="brand.name",
+        read_only=True,
+    )
 
 
 class ProductDetailSerializer(ProductSerializer):
@@ -183,6 +188,8 @@ class ProductDetailSerializer(ProductSerializer):
         representation = super().to_representation(instance)
         user = self.context["request"].user
 
+        representation.move_to_end("create_datetime")
+        representation.move_to_end("update_datetime")
         representation.move_to_end("main_image")
         representation.move_to_end("absolute_url")
         representation.move_to_end("brand_info")
@@ -199,15 +206,19 @@ class ProductDetailSerializer(ProductSerializer):
 
     def get_brand_info(self, product):
         brand = product.brand
-        products_list_url = reverse(
-            viewname="brands:brand_product_list",
-            kwargs={"brand_url": brand.url},
-        )
-        return {
-            "name": brand.name,
-            "absolute_url": brand.get_absolute_url(),
-            "products_list_url": products_list_url,
-        }
+
+        if brand:
+            products_list_url = reverse(
+                viewname="brands:brand_product_list",
+                kwargs={"brand_url": brand.url},
+            )
+            return {
+                "name": brand.name,
+                "absolute_url": brand.get_absolute_url(),
+                "products_list_url": products_list_url,
+            }
+        else:
+            return None
 
     def get_category_info(self, product):
         category = product.category
