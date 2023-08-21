@@ -1,40 +1,24 @@
 from django.urls import reverse
 from rest_framework import serializers
 
-from . import models
-from .models import Product
+from .models import Product, ProductItem, ProductMedia
 
 
 class ProductItemSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.ProductItem
+        model = ProductItem
         fields = "__all__"
 
 
-class PrivateProductListSerializer(serializers.ModelSerializer):
+class ProductMediaSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Product
-        fields = (
-            "name",
-            "category",
-            "category_url",
-            "main_image",
-            "rating",
-            "get_absolute_url",
-            "is_available",
-        )
-
-    category = serializers.CharField(
-        source="category.name",
-    )
-    category_url = serializers.CharField(
-        source="category.get_absolute_url",
-    )
+        model = ProductMedia
+        fields = "__all__"
 
 
 class PublicProductListSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Product
+        model = Product
         fields = (
             "name",
             "category",
