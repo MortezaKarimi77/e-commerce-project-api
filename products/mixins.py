@@ -15,10 +15,10 @@ class ProductAPIViewMixin:
 
         if user.is_staff:
             queryset = super().get_queryset()
-            cache_key = "all_products_queryset"
+            cache_key = "all_products"
         else:
             queryset = self.model.objects.get_visible_products()
-            cache_key = "visible_products_queryset"
+            cache_key = "visible_products"
 
         cached_queryset = cache.get_or_set(
             key=cache_key, default=queryset, timeout=None
