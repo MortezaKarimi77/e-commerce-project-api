@@ -1,7 +1,77 @@
 from django.urls import reverse
 from rest_framework import serializers
 
-from .models import Product, ProductItem, ProductMedia
+from .models import Attribute, AttributeValue, Product, ProductItem, ProductMedia
+
+
+class AttributeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attribute
+        fields = "__all__"
+
+        extra_kwargs = {
+            "category": {
+                "write_only": True,
+            },
+        }
+
+    # methods
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation.move_to_end("absolute_url")
+        representation.move_to_end("category_url")
+        return representation
+
+    # fields
+    category_full_name = serializers.CharField(
+        source="category.full_name",
+        read_only=True,
+    )
+    category_url = serializers.CharField(
+        source="category.get_absolute_url",
+        read_only=True,
+    )
+    absolute_url = serializers.CharField(
+        source="get_absolute_url",
+        read_only=True,
+    )
+
+
+class AttributeValueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttributeValue
+        fields = "__all__"
+
+        extra_kwargs = {
+            "attribute": {
+                "write_only": True,
+            },
+        }
+
+    # methods
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation.move_to_end("absolute_url")
+        representation.move_to_end("attribute_url")
+        return representation
+
+    # fields
+    attribute_name = serializers.CharField(
+        source="attribute.name",
+        read_only=True,
+    )
+    attribute_url = serializers.CharField(
+        source="attribute.get_absolute_url",
+        read_only=True,
+    )
+    attribute_category = serializers.CharField(
+        source="attribute.category.full_name",
+        read_only=True,
+    )
+    absolute_url = serializers.CharField(
+        source="get_absolute_url",
+        read_only=True,
+    )
 
 
 class ProductItemSerializer(serializers.ModelSerializer):
@@ -104,62 +174,6 @@ class ProductMediaSerializer(serializers.ModelSerializer):
         source="get_absolute_url",
         read_only=True,
     )
-
-
-class PublicProductListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = (
-            "name",
-            "category",
-            "category_url",
-            "price",
-            "main_image",
-            "rating",
-            "get_absolute_url",
-            "items",
-        )
-
-    def get_price(self, product):
-        cheapest_product_item = (
-            product.items.filter(
-                is_visible=True,
-                is_available=True,
-            )
-            .order_by("selling_price")
-            .only(
-                "product_id",
-                "selling_price",
-                "original_price",
-            )
-            .first()
-        )
-
-        if product.is_available and cheapest_product_item:
-            return {
-                "original_price": cheapest_product_item.original_price,
-                "selling_price": cheapest_product_item.selling_price,
-            }
-
-    def get_category(self, product):
-        product_subcategory = product.category.parent_category
-        product_category = product.category
-
-        if product_subcategory:
-            return product_subcategory.__str__() + " | " + product_category.name
-        else:
-            return product_category.__str__()
-
-    category = serializers.SerializerMethodField(
-        source="get_category",
-    )
-    category_url = serializers.CharField(
-        source="category.get_absolute_url",
-    )
-    price = serializers.SerializerMethodField(
-        method_name="get_price",
-    )
-    items = ProductItemSerializer(many=True)
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -318,3 +332,59 @@ class ProductDetailSerializer(ProductSerializer):
         many=True,
         read_only=True,
     )
+
+
+class PublicProductListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = (
+            "name",
+            "category",
+            "category_url",
+            "price",
+            "main_image",
+            "rating",
+            "get_absolute_url",
+            "items",
+        )
+
+    def get_price(self, product):
+        cheapest_product_item = (
+            product.items.filter(
+                is_visible=True,
+                is_available=True,
+            )
+            .order_by("selling_price")
+            .only(
+                "product_id",
+                "selling_price",
+                "original_price",
+            )
+            .first()
+        )
+
+        if product.is_available and cheapest_product_item:
+            return {
+                "original_price": cheapest_product_item.original_price,
+                "selling_price": cheapest_product_item.selling_price,
+            }
+
+    def get_category(self, product):
+        product_subcategory = product.category.parent_category
+        product_category = product.category
+
+        if product_subcategory:
+            return product_subcategory.__str__() + " | " + product_category.name
+        else:
+            return product_category.__str__()
+
+    category = serializers.SerializerMethodField(
+        source="get_category",
+    )
+    category_url = serializers.CharField(
+        source="category.get_absolute_url",
+    )
+    price = serializers.SerializerMethodField(
+        method_name="get_price",
+    )
+    items = ProductItemSerializer(many=True)

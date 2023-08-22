@@ -3,8 +3,12 @@ from rest_framework.permissions import IsAdminUser
 
 from utility.permissions import IsAdminOrReadOnly
 
-from .models import Product, ProductItem, ProductMedia
-from .serializers import ProductMediaSerializer
+from .models import Attribute, AttributeValue, Product, ProductItem, ProductMedia
+from .serializers import (
+    AttributeSerializer,
+    AttributeValueSerializer,
+    ProductMediaSerializer,
+)
 
 
 class ProductAPIViewMixin:
@@ -36,4 +40,16 @@ class ProductItemAPIViewMixin:
 class ProductMediaAPIViewMixin:
     queryset = ProductMedia.objects.select_related("product")
     serializer_class = ProductMediaSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class AttributeAPIViewMixin:
+    queryset = Attribute.objects.select_related("category")
+    serializer_class = AttributeSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class AttributeValueAPIViewMixin:
+    queryset = AttributeValue.objects.select_related("attribute", "attribute__category")
+    serializer_class = AttributeValueSerializer
     permission_classes = (IsAdminUser,)

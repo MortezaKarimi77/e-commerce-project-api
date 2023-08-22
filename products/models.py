@@ -334,7 +334,13 @@ class Attribute(models.Model):
 
     # methods
     def __str__(self):
-        return f"{self.category} | {self.name}"
+        return f"{self.category.full_name} - {self.name}"
+
+    def get_absolute_url(self):
+        return reverse(
+            "products:attribute_detail_update_delete",
+            kwargs={"attribute_id": self.id},
+        )
 
     # fields
     category = models.ForeignKey(
@@ -358,7 +364,22 @@ class AttributeValue(models.Model):
 
     # methods
     def __str__(self):
-        return f"{self.attribute}"
+        model_fields = self._meta.get_fields()
+
+        for field in model_fields:
+            if not field.is_relation:
+                field_name = field.name
+                field_value = getattr(self, field_name)
+                if field_value and field_name != "id":
+                    break
+
+        return f"{self.attribute}: {field_value}"
+
+    def get_absolute_url(self):
+        return reverse(
+            "products:attribute_value_detail_update_delete",
+            kwargs={"attribute_value_id": self.id},
+        )
 
     # fields
     attribute = models.ForeignKey(

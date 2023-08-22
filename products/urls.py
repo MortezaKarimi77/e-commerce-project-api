@@ -34,4 +34,24 @@ urlpatterns = [
         view=views.ProductMediaDetailUpdateDelete.as_view(),
         name="product_media_detail_update_delete",
     ),
+    path(
+        route="attribute-list-create/",
+        view=views.AttributeListCreate.as_view(),
+        name="attribute_list_create",
+    ),
+    path(
+        route="attribute-detail-update-delete/<attribute_id>/",
+        view=views.AttributeDetailUpdateDelete.as_view(),
+        name="attribute_detail_update_delete",
+    ),
+    path(
+        route="attribute-value-list-create/",
+        view=views.AttributeValueListCreate.as_view(),
+        name="attribute_value_list_create",
+    ),
+    path(
+        route="attribute-value-detail-update-delete/<attribute_value_id>/",
+        view=views.AttributeValueDetailUpdateDelete.as_view(),
+        name="attribute_value_detail_update_delete",
+    ),
 ]

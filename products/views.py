@@ -3,6 +3,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 
 from .mixins import (
+    AttributeAPIViewMixin,
+    AttributeValueAPIViewMixin,
     ProductAPIViewMixin,
     ProductItemAPIViewMixin,
     ProductMediaAPIViewMixin,
@@ -23,7 +25,7 @@ class ProductListCreate(ProductAPIViewMixin, ListCreateAPIView):
 
 class ProductDetailUpdateDelete(ProductAPIViewMixin, RetrieveUpdateDestroyAPIView):
     serializer_class = ProductDetailSerializer
-    # http_method_names = ("get", "patch", "delete")
+    http_method_names = ("get", "patch", "delete")
 
     def get_object(self):
         category_id = self.kwargs["category_id"]
@@ -54,7 +56,7 @@ class ProductItemDetailUpdateDelete(
     lookup_field = "id"
     lookup_url_kwarg = "product_item_id"
     serializer_class = ProductItemDetailSerializer
-    # http_method_names = ("get", "patch", "delete")
+    http_method_names = ("get", "patch", "delete")
 
 
 class ProductMediaListCreate(ProductMediaAPIViewMixin, ListCreateAPIView):
@@ -66,4 +68,26 @@ class ProductMediaDetailUpdateDelete(
 ):
     lookup_field = "id"
     lookup_url_kwarg = "product_media_id"
+    http_method_names = ("get", "patch", "delete")
+
+
+class AttributeListCreate(AttributeAPIViewMixin, ListCreateAPIView):
+    pass
+
+
+class AttributeDetailUpdateDelete(AttributeAPIViewMixin, RetrieveUpdateDestroyAPIView):
+    lookup_field = "id"
+    lookup_url_kwarg = "attribute_id"
+    http_method_names = ("get", "patch", "delete")
+
+
+class AttributeValueListCreate(AttributeValueAPIViewMixin, ListCreateAPIView):
+    pass
+
+
+class AttributeValueDetailUpdateDelete(
+    AttributeValueAPIViewMixin, RetrieveUpdateDestroyAPIView
+):
+    lookup_field = "id"
+    lookup_url_kwarg = "attribute_value_id"
     http_method_names = ("get", "patch", "delete")
