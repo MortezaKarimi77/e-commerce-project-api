@@ -209,12 +209,18 @@ class Product(LifecycleModelMixin, TimeStamp):
 
 class ProductItem(LifecycleModelMixin, models.Model):
     class Meta:
-        ordering = ("-is_available", "-id")
+        ordering = ("-is_visible", "-is_available", "-id")
         db_table = "product_item"
 
     # methods
     def __str__(self):
         return f"{self.product} | {self.selling_price}"
+
+    def get_absolute_url(self):
+        return reverse(
+            "products:product_item_detail_update_delete",
+            kwargs={"product_item_id": self.id},
+        )
 
     # hooks
     @hook(BEFORE_SAVE)

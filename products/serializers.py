@@ -5,9 +5,64 @@ from .models import Product, ProductItem, ProductMedia
 
 
 class ProductItemSerializer(serializers.ModelSerializer):
+    # fields
+    product_name = serializers.CharField(
+        source="product.name",
+        read_only=True,
+    )
+    product_url = serializers.CharField(
+        source="product.get_absolute_url",
+        read_only=True,
+    )
+    absolute_url = serializers.CharField(
+        source="get_absolute_url",
+        read_only=True,
+    )
+
+
+class ProductItemListSerializer(ProductItemSerializer):
+    class Meta:
+        model = ProductItem
+        fields = (
+            "id",
+            "sku",
+            "product",
+            "product_name",
+            "product_url",
+            "original_price",
+            "selling_price",
+            "inventory",
+            "is_available",
+            "is_visible",
+            "absolute_url",
+            "configuration",
+        )
+        extra_kwargs = {
+            "product": {
+                "write_only": True,
+            },
+            "original_price": {
+                "write_only": True,
+            },
+            "inventory": {
+                "write_only": True,
+            },
+            "configuration": {
+                "write_only": True,
+            },
+        }
+
+
+class ProductItemDetailSerializer(ProductItemSerializer):
     class Meta:
         model = ProductItem
         fields = "__all__"
+
+        extra_kwargs = {
+            "product": {
+                "write_only": True,
+            },
+        }
 
 
 class ProductMediaSerializer(serializers.ModelSerializer):

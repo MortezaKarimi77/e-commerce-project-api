@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAdminUser
 
 from utility.permissions import IsAdminOrReadOnly
 
-from .models import Product, ProductMedia
+from .models import Product, ProductItem, ProductMedia
 from .serializers import ProductMediaSerializer
 
 
@@ -26,6 +26,11 @@ class ProductAPIViewMixin:
             key=cache_key, default=queryset, timeout=None
         )
         return cached_queryset
+
+
+class ProductItemAPIViewMixin:
+    queryset = ProductItem.objects.select_related("product")
+    permission_classes = (IsAdminUser,)
 
 
 class ProductMediaAPIViewMixin:

@@ -2,8 +2,17 @@ from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 
-from .mixins import ProductAPIViewMixin, ProductMediaAPIViewMixin
-from .serializers import ProductDetailSerializer, ProductListSerializer
+from .mixins import (
+    ProductAPIViewMixin,
+    ProductItemAPIViewMixin,
+    ProductMediaAPIViewMixin,
+)
+from .serializers import (
+    ProductDetailSerializer,
+    ProductItemDetailSerializer,
+    ProductItemListSerializer,
+    ProductListSerializer,
+)
 
 
 class ProductListCreate(ProductAPIViewMixin, ListCreateAPIView):
@@ -33,6 +42,19 @@ class ProductDetailUpdateDelete(ProductAPIViewMixin, RetrieveUpdateDestroyAPIVie
             )
 
         return cached_object
+
+
+class ProductItemListCreate(ProductItemAPIViewMixin, ListCreateAPIView):
+    serializer_class = ProductItemListSerializer
+
+
+class ProductItemDetailUpdateDelete(
+    ProductItemAPIViewMixin, RetrieveUpdateDestroyAPIView
+):
+    lookup_field = "id"
+    lookup_url_kwarg = "product_item_id"
+    serializer_class = ProductItemDetailSerializer
+    # http_method_names = ("get", "patch", "delete")
 
 
 class ProductMediaListCreate(ProductMediaAPIViewMixin, ListCreateAPIView):
