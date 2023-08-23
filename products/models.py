@@ -233,6 +233,11 @@ class ProductItem(LifecycleModelMixin, models.Model):
         if not self.selling_price:
             self.selling_price = self.original_price
 
+    @hook(BEFORE_SAVE)
+    def set_availability(self):
+        if self.inventory == 0:
+            self.is_available = False
+
     # fields
     product = models.ForeignKey(
         verbose_name=_("محصول"),
