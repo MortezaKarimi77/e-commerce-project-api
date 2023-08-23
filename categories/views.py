@@ -6,7 +6,7 @@ from rest_framework.generics import (
 )
 
 from products.models import Product
-from products.serializers import PublicProductListSerializer
+from products.serializers import ProductListSerializer
 
 from .mixins import CategoryAPIViewMixin
 from .serializers import CategoryDetailSerializer, CategoryListSerializer
@@ -41,14 +41,11 @@ class CategoryDetailUpdateDelete(CategoryAPIViewMixin, RetrieveUpdateDestroyAPIV
 
 class CategoryProductList(ListAPIView):
     queryset = Product.objects.all()
-    serializer_class = PublicProductListSerializer
+    serializer_class = ProductListSerializer
 
     def get_queryset(self):
+        user = self.request.user
         category_id = self.kwargs["category_id"]
-        cache_key = f"category_{category_id}_products"
-        queryset = Product.objects.get_category_products(category_id=category_id)
 
-        cached_queryset = cache.get_or_set(
-            key=cache_key, default=queryset, timeout=None
-        )
-        return cached_queryset
+        queryset = Product.objects.category_products(category_id=category_id, user=user)
+        return queryset

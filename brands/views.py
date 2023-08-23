@@ -6,7 +6,7 @@ from rest_framework.generics import (
 )
 
 from products.models import Product
-from products.serializers import PublicProductListSerializer
+from products.serializers import ProductListSerializer
 
 from .mixins import BrandAPIViewMixin
 from .serializers import BrandDetailSerializer, BrandListSerializer
@@ -37,16 +37,13 @@ class BrandDetailUpdateDelete(BrandAPIViewMixin, RetrieveUpdateDestroyAPIView):
 
 
 class BrandProductList(ListAPIView):
-    serializer_class = PublicProductListSerializer
+    serializer_class = ProductListSerializer
     search_fields = ("name",)
     # ordering_fields = ("rating", "create_datetime")
 
     def get_queryset(self):
+        user = self.request.user
         brand_url = self.kwargs["brand_url"]
-        cache_key = f"{brand_url}_products"
-        queryset = Product.objects.get_brand_products(brand_url=brand_url)
 
-        cached_queryset = cache.get_or_set(
-            key=cache_key, default=queryset, timeout=None
-        )
-        return cached_queryset
+        queryset = Product.objects.brand_products(brand_url=brand_url, user=user)
+        return queryset
