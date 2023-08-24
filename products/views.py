@@ -19,8 +19,8 @@ from .serializers import (
 
 class ProductListCreate(ProductAPIViewMixin, ListCreateAPIView):
     serializer_class = ProductListSerializer
-    # ordering_fields = ("id", "name", "country")
-    # search_fields = ("name", "country")
+    ordering_fields = ("id", "rating", "cheapest_product_item__selling_price")
+    search_fields = ("name", "brand__name", "category__full_name")
 
 
 class ProductDetailUpdateDelete(ProductAPIViewMixin, RetrieveUpdateDestroyAPIView):

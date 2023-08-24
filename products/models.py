@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django_lifecycle import (
+    AFTER_CREATE,
     AFTER_DELETE,
     AFTER_SAVE,
     BEFORE_SAVE,
@@ -72,6 +73,22 @@ class Product(LifecycleModelMixin, TimeStamp):
 
     # hooks
     @hook(BEFORE_SAVE)
+    def find_cheapest_product_item(self):
+        cheapest_product_item = (
+            self.items.filter(
+                inventory__gt=0,
+                is_visible=True,
+                is_available=True,
+            )
+            .order_by("selling_price")
+            .first()
+        )
+        if cheapest_product_item:
+            self.cheapest_product_item = cheapest_product_item
+        else:
+            self.cheapest_product_item = None
+
+    @hook(BEFORE_SAVE)
     def set_metadate(self):
         if not self.meta_title:
             self.meta_title = self.name
@@ -99,8 +116,8 @@ class Product(LifecycleModelMixin, TimeStamp):
         cache.delete(key=f"product_{self.url}")
         cache.delete(key=f"category_{category.id}_all_products")
         cache.delete(key=f"category_{category.id}_visible_products")
-        cache.delete(key=f"brand_{brand.url}_all_products")
-        cache.delete(key=f"brand_{brand.url}_visible_products")
+        cache.delete(key=f"brand_{brand.url if brand else None}_all_products")
+        cache.delete(key=f"brand_{brand.url if brand else None}_visible_products")
 
     # fields
     category = models.ForeignKey(
@@ -115,6 +132,15 @@ class Product(LifecycleModelMixin, TimeStamp):
         related_name="products",
         to="brands.Brand",
         on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        db_index=True,
+    )
+    cheapest_product_item = models.OneToOneField(
+        verbose_name=_("ارزان‌ترین محصول"),
+        related_name="cheapest_product",
+        to="ProductItem",
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
         db_index=True,
@@ -228,6 +254,12 @@ class ProductItem(LifecycleModelMixin, models.Model):
         )
 
     # hooks
+    @hook(AFTER_CREATE)
+    @hook(AFTER_SAVE)
+    @hook(AFTER_DELETE)
+    def update_cheapest_product_item(self):
+        self.product.save()
+
     @hook(BEFORE_SAVE)
     def set_selling_price(self):
         if not self.selling_price:

@@ -5,7 +5,7 @@ from django.db import models
 class ProductManager(models.Manager):
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset = queryset.select_related("brand", "category")
+        queryset = queryset.select_related("brand", "category", "cheapest_product_item")
         return queryset
 
     def products_list(self, user):

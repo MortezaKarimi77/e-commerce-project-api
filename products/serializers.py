@@ -262,7 +262,8 @@ class ProductListSerializer(ProductSerializer):
             "rating",
             "absolute_url",
             "main_image",
-            "price",
+            "original_price",
+            "selling_price",
         )
 
         extra_kwargs = {
@@ -301,24 +302,6 @@ class ProductListSerializer(ProductSerializer):
             },
         }
 
-    # methods
-    def get_price(self, product):
-        cheapest_product_item = (
-            product.items.filter(
-                inventory__gt=0,
-                is_visible=True,
-                is_available=True,
-            )
-            .order_by("selling_price")
-            .first()
-        )
-
-        if product.is_available and cheapest_product_item:
-            return {
-                "original_price": cheapest_product_item.original_price,
-                "selling_price": cheapest_product_item.selling_price,
-            }
-
     # fields
     category_full_name = serializers.CharField(
         source="category.full_name",
@@ -328,8 +311,13 @@ class ProductListSerializer(ProductSerializer):
         source="brand.name",
         read_only=True,
     )
-    price = serializers.SerializerMethodField(
-        method_name="get_price",
+    original_price = serializers.CharField(
+        source="cheapest_product_item.original_price",
+        read_only=True,
+    )
+    selling_price = serializers.CharField(
+        source="cheapest_product_item.selling_price",
+        read_only=True,
     )
 
 
