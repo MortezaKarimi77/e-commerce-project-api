@@ -74,6 +74,26 @@ class AttributeValueSerializer(serializers.ModelSerializer):
     )
 
 
+class ConfigurationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttributeValue
+        fields = (
+            "attribute_name",
+            "char_value",
+            "text_value",
+            "int_value",
+            "decimal_value",
+            "date_value",
+            "time_value",
+        )
+
+    # fields
+    attribute_name = serializers.CharField(
+        source="attribute.name",
+        read_only=True,
+    )
+
+
 class ProductItemSerializer(serializers.ModelSerializer):
     # fields
     product_name = serializers.CharField(
@@ -132,7 +152,40 @@ class ProductItemDetailSerializer(ProductItemSerializer):
             "product": {
                 "write_only": True,
             },
+            "configuration": {
+                "write_only": True,
+            },
         }
+
+    # methods
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation.move_to_end("product_item_configuration")
+        return representation
+
+    def get_product_item_configuration(self, product_item):
+        product_items = product_item.configuration.select_related("attribute")
+        return ConfigurationSerializer(instance=product_items, many=True).data
+
+    # fields
+    product_item_configuration = serializers.SerializerMethodField(
+        method_name="get_product_item_configuration",
+    )
+
+
+class ProductItemInProductSerializer(ProductItemDetailSerializer):
+    class Meta:
+        model = ProductItem
+        fields = (
+            "id",
+            "original_price",
+            "selling_price",
+            "inventory",
+            "is_available",
+            "is_visible",
+            "absolute_url",
+            "product_item_configuration",
+        )
 
 
 class ProductMediaSerializer(serializers.ModelSerializer):
@@ -177,6 +230,7 @@ class ProductMediaSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    # fields
     absolute_url = serializers.CharField(
         source="get_absolute_url",
         read_only=True,
@@ -246,7 +300,7 @@ class ProductListSerializer(ProductSerializer):
             },
         }
 
-    # methods
+    # fields
     category_full_name = serializers.CharField(
         source="category.full_name",
         read_only=True,
@@ -283,11 +337,11 @@ class ProductDetailSerializer(ProductSerializer):
         representation.move_to_end("brand_info")
         representation.move_to_end("category_info")
         representation.move_to_end("media_files")
+        representation.move_to_end("items")
 
         if not user.is_staff:
             representation.pop("create_datetime", None)
             representation.pop("update_datetime", None)
-            representation.pop("is_visible", None)
             representation.pop("views_count", None)
             representation.pop("sold_count", None)
 
@@ -329,6 +383,10 @@ class ProductDetailSerializer(ProductSerializer):
         method_name="get_category_info",
     )
     media_files = ProductMediaSerializer(
+        many=True,
+        read_only=True,
+    )
+    items = ProductItemInProductSerializer(
         many=True,
         read_only=True,
     )

@@ -20,7 +20,7 @@ class ProductAPIViewMixin:
 
 
 class ProductItemAPIViewMixin:
-    queryset = ProductItem.objects.select_related("product")
+    queryset = ProductItem.objects.select_related("product", "product__category")
     permission_classes = (IsAdminUser,)
 
 
