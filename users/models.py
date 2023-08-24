@@ -12,12 +12,8 @@ class WishList(models.Model):
         db_table = "wishlist"
 
     # methods
-    def __str__(self):
-        return f"{self.user_full_name} - {self.product.name}"
-
-    @property
-    def user_full_name(self):
-        return self.user.get_full_name()
+    def __str__(self) -> str:
+        return f"{self.user.get_full_name()} - {self.product.name}"
 
     # fields
     user = models.ForeignKey(
@@ -42,12 +38,8 @@ class PurchasedProducts(models.Model):
         db_table = "purchased_products"
 
     # methods
-    def __str__(self):
-        return f"{self.user_full_name} - {self.product.name}"
-
-    @property
-    def user_full_name(self):
-        return self.user.get_full_name()
+    def __str__(self) -> str:
+        return f"{self.user.get_full_name()} - {self.product.name}"
 
     # fields
     user = models.ForeignKey(
