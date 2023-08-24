@@ -262,6 +262,7 @@ class ProductListSerializer(ProductSerializer):
             "rating",
             "absolute_url",
             "main_image",
+            "price",
         )
 
         extra_kwargs = {
@@ -300,6 +301,24 @@ class ProductListSerializer(ProductSerializer):
             },
         }
 
+    # methods
+    def get_price(self, product):
+        cheapest_product_item = (
+            product.items.filter(
+                inventory__gt=0,
+                is_visible=True,
+                is_available=True,
+            )
+            .order_by("selling_price")
+            .first()
+        )
+
+        if product.is_available and cheapest_product_item:
+            return {
+                "original_price": cheapest_product_item.original_price,
+                "selling_price": cheapest_product_item.selling_price,
+            }
+
     # fields
     category_full_name = serializers.CharField(
         source="category.full_name",
@@ -308,6 +327,9 @@ class ProductListSerializer(ProductSerializer):
     brand_name = serializers.CharField(
         source="brand.name",
         read_only=True,
+    )
+    price = serializers.SerializerMethodField(
+        method_name="get_price",
     )
 
 
@@ -390,59 +412,3 @@ class ProductDetailSerializer(ProductSerializer):
         many=True,
         read_only=True,
     )
-
-
-class PublicProductListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = (
-            "name",
-            "category",
-            "category_url",
-            "price",
-            "main_image",
-            "rating",
-            "get_absolute_url",
-            "items",
-        )
-
-    def get_price(self, product):
-        cheapest_product_item = (
-            product.items.filter(
-                is_visible=True,
-                is_available=True,
-            )
-            .order_by("selling_price")
-            .only(
-                "product_id",
-                "selling_price",
-                "original_price",
-            )
-            .first()
-        )
-
-        if product.is_available and cheapest_product_item:
-            return {
-                "original_price": cheapest_product_item.original_price,
-                "selling_price": cheapest_product_item.selling_price,
-            }
-
-    def get_category(self, product):
-        product_subcategory = product.category.parent_category
-        product_category = product.category
-
-        if product_subcategory:
-            return product_subcategory.__str__() + " | " + product_category.name
-        else:
-            return product_category.__str__()
-
-    category = serializers.SerializerMethodField(
-        source="get_category",
-    )
-    category_url = serializers.CharField(
-        source="category.get_absolute_url",
-    )
-    price = serializers.SerializerMethodField(
-        method_name="get_price",
-    )
-    items = ProductItemSerializer(many=True)
