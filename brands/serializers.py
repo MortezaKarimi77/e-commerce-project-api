@@ -5,9 +5,9 @@ from .models import Brand
 
 
 class BrandSerializer(serializers.ModelSerializer):
-    def get_products_list_url(self, brand):
+    def get_products_url(self, brand) -> str:
         return reverse(
-            viewname="brands:brand_product_list",
+            viewname="brands:brand_products",
             kwargs={"brand_url": brand.url},
         )
 
@@ -15,8 +15,8 @@ class BrandSerializer(serializers.ModelSerializer):
         source="get_absolute_url",
         read_only=True,
     )
-    products_list_url = serializers.SerializerMethodField(
-        method_name="get_products_list_url",
+    products_url = serializers.SerializerMethodField(
+        method_name="get_products_url",
     )
 
 
@@ -28,7 +28,7 @@ class BrandListSerializer(BrandSerializer):
             "name",
             "url",
             "absolute_url",
-            "products_list_url",
+            "products_url",
             "country",
             "description",
             "meta_title",

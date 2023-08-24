@@ -26,16 +26,16 @@ class Brand(LifecycleModelMixin, models.Model):
         )
 
     # methods
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse(
             viewname="brands:brand_detail_update_delete",
             kwargs={"brand_url": self.url},
         )
 
-    def get_upload_path(self, filename):
+    def get_upload_path(self, filename) -> str:
         brand_name = self.url.replace("-", " ").strip()
         return f"brands/{brand_name}/{filename}"
 

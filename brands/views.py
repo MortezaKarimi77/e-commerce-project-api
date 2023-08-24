@@ -8,8 +8,8 @@ from rest_framework.generics import (
 from products.models import Product
 from products.serializers import ProductListSerializer
 
-from .mixins import BrandAPIViewMixin
 from .serializers import BrandDetailSerializer, BrandListSerializer
+from .viewmixins import BrandAPIViewMixin
 
 
 class BrandListCreate(BrandAPIViewMixin, ListCreateAPIView):
@@ -20,15 +20,15 @@ class BrandListCreate(BrandAPIViewMixin, ListCreateAPIView):
 
 class BrandDetailUpdateDelete(BrandAPIViewMixin, RetrieveUpdateDestroyAPIView):
     serializer_class = BrandDetailSerializer
-    http_method_names = ("get", "patch", "delete")
     lookup_field = "url"
     lookup_url_kwarg = "brand_url"
+    http_method_names = ("get", "patch", "delete")
 
     def get_object(self):
         brand_url = self.kwargs["brand_url"]
         cache_key = f"brand_{brand_url}"
-        cached_object = cache.get(key=cache_key)
 
+        cached_object = cache.get(key=cache_key)
         if cached_object is None:
             brand = super().get_object()
             cached_object = cache.get_or_set(key=cache_key, default=brand, timeout=None)
@@ -38,8 +38,8 @@ class BrandDetailUpdateDelete(BrandAPIViewMixin, RetrieveUpdateDestroyAPIView):
 
 class BrandProductList(ListAPIView):
     serializer_class = ProductListSerializer
-    search_fields = ("name",)
-    # ordering_fields = ("rating", "create_datetime")
+    ordering_fields = ("id", "rating", "cheapest_product_item__selling_price")
+    search_fields = ("name", "brand__name", "category__full_name")
 
     def get_queryset(self):
         user = self.request.user

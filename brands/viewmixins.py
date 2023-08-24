@@ -11,8 +11,9 @@ class BrandAPIViewMixin:
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        cache_key = "brands_queryset"
 
         cached_queryset = cache.get_or_set(
-            key="brands_queryset", default=queryset, timeout=None
+            key=cache_key, default=queryset, timeout=None
         )
         return cached_queryset
