@@ -1,49 +1,20 @@
 from django.contrib.auth import get_user_model
-from django.core import validators
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import F
 from django.utils.translation import gettext_lazy as _
-from django_lifecycle import (
-    AFTER_CREATE,
-    BEFORE_CREATE,
-    BEFORE_DELETE,
-    LifecycleModelMixin,
-    hook,
-)
+from django_lifecycle import LifecycleModelMixin
+
+from .modelmixins import CommentModelMixin
 
 User = get_user_model()
 
 
-class Comment(LifecycleModelMixin, models.Model):
+class Comment(LifecycleModelMixin, CommentModelMixin, models.Model):
     class Meta:
         ordering = ("-create_datetime",)
         unique_together = ("user", "product")
         db_table = "comment"
 
-    # methods
-    def __str__(self):
-        return f"{self.user.get_full_name()} - {self.text:20} ..."
-
-    # hooks
-    @hook(BEFORE_CREATE)
-    def set_is_buyer(self):
-        user_is_buyer = self.user.purchased_products.filter(
-            product=self.product
-        ).exists()
-        if user_is_buyer:
-            self.is_buyer = True
-
-    @hook(AFTER_CREATE)
-    def increase_comments_count(self):
-        self.product.comments_count = F("comments_count") + 1
-        self.product.save()
-
-    @hook(BEFORE_DELETE)
-    def decrease_comments_count(self):
-        self.product.comments_count = F("comments_count") - 1
-        self.product.save()
-
-    # fields
     user = models.ForeignKey(
         verbose_name=_("کاربر"),
         related_name="comments",
@@ -61,8 +32,8 @@ class Comment(LifecycleModelMixin, models.Model):
         default=0,
         editable=False,
         validators=(
-            validators.MinValueValidator(0),
-            validators.MaxValueValidator(5),
+            MinValueValidator(0),
+            MaxValueValidator(5),
         ),
     )
     text = models.TextField(
