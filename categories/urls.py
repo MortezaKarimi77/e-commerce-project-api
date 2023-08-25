@@ -5,18 +5,18 @@ from . import views
 app_name = "categories"
 urlpatterns = [
     path(
-        route="category-list-create/",
+        route="categories/",
         view=views.CategoryListCreate.as_view(),
         name="category_list_create",
     ),
     path(
-        route="category-detail-update-delete/<category_id>/",
+        route="categories/<category_id>/",
         view=views.CategoryDetailUpdateDelete.as_view(),
         name="category_detail_update_delete",
     ),
     path(
-        route="category-product-list/<category_id>/",
+        route="categories/<category_id>/products/",
         view=views.CategoryProductList.as_view(),
-        name="category_product_list",
+        name="category_products",
     ),
 ]

@@ -43,13 +43,13 @@ class Category(LifecycleModelMixin, TimeStamp):
         indexes = (Index(Lower("name"), name="lower_category_name_idx"),)
 
     # methods
-    def __str__(self):
+    def __str__(self) -> str:
         return self.full_name
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse(
             viewname="categories:category_detail_update_delete",
-            kwargs={"category_id": self.pk},
+            kwargs={"category_id": self.id},
         )
 
     def validate_unique(self, exclude):
@@ -61,8 +61,8 @@ class Category(LifecycleModelMixin, TimeStamp):
 
         return super().validate_unique(exclude)
 
-    def clean(self, serializer_parent_category=None):
-        if (self == self.parent_category) or (self == serializer_parent_category):
+    def clean(self):
+        if self == self.parent_category:
             raise ValidationError(_("یک دسته‌بندی نمی‌تواند زیردسته خودش باشد"))
 
     # hooks

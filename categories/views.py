@@ -8,8 +8,8 @@ from rest_framework.generics import (
 from products.models import Product
 from products.serializers import ProductListSerializer
 
-from .mixins import CategoryAPIViewMixin
 from .serializers import CategoryDetailSerializer, CategoryListSerializer
+from .viewmixins import CategoryAPIViewMixin
 
 
 class CategoryListCreate(CategoryAPIViewMixin, ListCreateAPIView):
@@ -21,15 +21,15 @@ class CategoryListCreate(CategoryAPIViewMixin, ListCreateAPIView):
 
 class CategoryDetailUpdateDelete(CategoryAPIViewMixin, RetrieveUpdateDestroyAPIView):
     serializer_class = CategoryDetailSerializer
-    http_method_names = ("get", "patch", "delete")
     lookup_field = "id"
     lookup_url_kwarg = "category_id"
+    http_method_names = ("get", "patch", "delete")
 
     def get_object(self):
         category_id = self.kwargs["category_id"]
         cache_key = f"category_{category_id}"
-        cached_object = cache.get(key=cache_key)
 
+        cached_object = cache.get(key=cache_key)
         if cached_object is None:
             category = super().get_object()
             cached_object = cache.get_or_set(
@@ -40,8 +40,9 @@ class CategoryDetailUpdateDelete(CategoryAPIViewMixin, RetrieveUpdateDestroyAPIV
 
 
 class CategoryProductList(ListAPIView):
-    queryset = Product.objects.all()
     serializer_class = ProductListSerializer
+    ordering_fields = ("id", "rating", "cheapest_product_item__selling_price")
+    search_fields = ("name", "brand__name", "category__full_name")
 
     def get_queryset(self):
         user = self.request.user

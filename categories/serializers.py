@@ -36,9 +36,9 @@ class CategorySerializer(serializers.ModelSerializer):
 
         return super().validate(data)
 
-    def get_products_list_url(self, category):
+    def get_products_url(self, category):
         return reverse(
-            viewname="categories:category_product_list",
+            viewname="categories:category_products",
             kwargs={"category_id": category.id},
         )
 
@@ -47,8 +47,8 @@ class CategorySerializer(serializers.ModelSerializer):
         source="get_absolute_url",
         read_only=True,
     )
-    products_list_url = serializers.SerializerMethodField(
-        method_name="get_products_list_url",
+    products_url = serializers.SerializerMethodField(
+        method_name="get_products_url",
     )
 
 
@@ -61,7 +61,7 @@ class ParentCategorySerializer(CategorySerializer):
             "full_name",
             "url",
             "absolute_url",
-            "products_list_url",
+            "products_url",
         )
 
 
@@ -74,7 +74,7 @@ class CategoryListSerializer(CategorySerializer):
             "full_name",
             "url",
             "absolute_url",
-            "products_list_url",
+            "products_url",
             "description",
             "meta_title",
             "meta_description",

@@ -12,8 +12,9 @@ class CategoryAPIViewMixin:
     def get_queryset(self):
         queryset = super().get_queryset()
         queryset = queryset.select_related("parent_category")
+        cache_key = "categories_queryset"
 
         cached_queryset = cache.get_or_set(
-            key="categories_queryset", default=queryset, timeout=None
+            key=cache_key, default=queryset, timeout=None
         )
         return cached_queryset
