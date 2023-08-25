@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
                     "main_image",
                     models.ImageField(
                         blank=True,
-                        upload_to=brands.models.Brand.get_upload_path,
+                        upload_to=brands.models.brand_directory_path,
                         verbose_name="تصویر",
                     ),
                 ),

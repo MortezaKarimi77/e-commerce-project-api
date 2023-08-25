@@ -1,21 +1,15 @@
-from django.core.cache import cache
 from django.db import models
 from django.db.models import Index
 from django.db.models.functions import Lower
-from django.urls import reverse
-from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-from django_lifecycle import (
-    AFTER_DELETE,
-    AFTER_SAVE,
-    BEFORE_SAVE,
-    BEFORE_UPDATE,
-    LifecycleModelMixin,
-    hook,
-)
+from django_lifecycle import LifecycleModelMixin
+
+from core.utils import brand_directory_path
+
+from .modelmixins import BrandModelMixin
 
 
-class Brand(LifecycleModelMixin, models.Model):
+class Brand(LifecycleModelMixin, BrandModelMixin, models.Model):
     class Meta:
         ordering = ("name",)
         db_table = "brand"
@@ -25,45 +19,6 @@ class Brand(LifecycleModelMixin, models.Model):
             Index(Lower("country"), name="lower_brand_country_idx"),
         )
 
-    # methods
-    def __str__(self) -> str:
-        return self.name
-
-    def get_absolute_url(self) -> str:
-        return reverse(
-            viewname="brands:brand_detail_update_delete",
-            kwargs={"brand_url": self.url},
-        )
-
-    def get_upload_path(self, filename) -> str:
-        brand_name = self.url.replace("-", " ").strip()
-        return f"brands/{brand_name}/{filename}"
-
-    # hooks
-    @hook(BEFORE_SAVE)
-    def set_metadate(self):
-        if not self.meta_title:
-            self.meta_title = self.name
-        if not self.meta_description:
-            self.meta_description = self.description
-
-    @hook(BEFORE_SAVE)
-    def set_url(self):
-        if not self.url:
-            self.url = slugify(value=self.name, allow_unicode=True)
-
-    @hook(BEFORE_UPDATE, when="main_image", has_changed=True)
-    def delete_old_image(self):
-        old_image = self._meta.model.objects.get(id=self.id).main_image
-        old_image.delete(save=False)
-
-    @hook(AFTER_SAVE)
-    @hook(AFTER_DELETE)
-    def clear_cache(self):
-        cache.delete(key=f"brand_{self.url}")
-        cache.delete(key="brands_queryset")
-
-    # fields
     name = models.CharField(
         verbose_name=_("نام"),
         max_length=100,
@@ -95,7 +50,7 @@ class Brand(LifecycleModelMixin, models.Model):
     )
     main_image = models.ImageField(
         verbose_name=_("تصویر"),
-        upload_to=get_upload_path,
+        upload_to=brand_directory_path,
         blank=True,
     )
     create_datetime = models.DateTimeField(
