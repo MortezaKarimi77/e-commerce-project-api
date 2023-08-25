@@ -1,6 +1,6 @@
 from rest_framework.permissions import IsAdminUser
 
-from utility.permissions import IsAdminOrReadOnly
+from core.permissions import IsAdminOrReadOnly
 
 from .models import Attribute, AttributeValue, Product, ProductItem, ProductMedia
 from .serializers import (

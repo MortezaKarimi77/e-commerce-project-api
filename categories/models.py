@@ -14,19 +14,7 @@ from django_lifecycle import (
     hook,
 )
 
-
-class TimeStamp(models.Model):
-    class Meta:
-        abstract = True
-
-    create_datetime = models.DateTimeField(
-        verbose_name=_("تاریخ و زمان ایجاد"),
-        auto_now_add=True,
-    )
-    update_datetime = models.DateTimeField(
-        verbose_name=_("تاریخ و زمان آخرین ویرایش"),
-        auto_now=True,
-    )
+from core.models import TimeStamp
 
 
 class Category(LifecycleModelMixin, TimeStamp):

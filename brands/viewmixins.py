@@ -1,6 +1,6 @@
 from django.core.cache import cache
 
-from utility.permissions import IsAdminOrReadOnly
+from core.permissions import IsAdminOrReadOnly
 
 from .models import Brand
 

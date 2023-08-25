@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "debug_toolbar",
     # local apps
+    "core.apps.CoreConfig",
     "products.apps.ProductsConfig",
     "categories.apps.CategoriesConfig",
     "comments.apps.CommentsConfig",
