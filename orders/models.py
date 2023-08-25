@@ -9,14 +9,6 @@ from django_lifecycle import (
     hook,
 )
 
-ORDER_STATUS_CHOICES = (
-    (0, _("پرداخت ناموفق")),
-    (1, _("پرداخت موفق")),
-    (2, _("در حال آماده سازی")),
-    (3, _("ارسال شده")),
-    (4, _("تحویل داده شده")),
-)
-
 User = get_user_model()
 
 
@@ -73,6 +65,21 @@ class OrderStatus(models.Model):
         ordering = ("status",)
         verbose_name_plural = "Order Statuses"
         db_table = "order_status"
+
+    # choices & constants
+    FAILED = 0
+    SUCCESSFUL = 1
+    PROCESSING = 2
+    SENT = 3
+    DELIVERED = 4
+
+    ORDER_STATUS_CHOICES = (
+        (FAILED, _("پرداخت ناموفق")),
+        (SUCCESSFUL, _("پرداخت موفق")),
+        (PROCESSING, _("در حال آماده سازی")),
+        (SENT, _("ارسال شده")),
+        (DELIVERED, _("تحویل داده شده")),
+    )
 
     # methods
     def __str__(self):
