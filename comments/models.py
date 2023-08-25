@@ -22,11 +22,7 @@ class Comment(LifecycleModelMixin, models.Model):
 
     # methods
     def __str__(self):
-        return f"{self.full_name} - {self.text:20} ..."
-
-    @property
-    def full_name(self):
-        return self.user.get_full_name()
+        return f"{self.user.get_full_name()} - {self.text:20} ..."
 
     # hooks
     @hook(BEFORE_CREATE)
@@ -63,7 +59,7 @@ class Comment(LifecycleModelMixin, models.Model):
     like = models.IntegerField(
         verbose_name=_("تعداد لایک"),
         default=0,
-        # editable=False,
+        editable=False,
         validators=(
             validators.MinValueValidator(0),
             validators.MaxValueValidator(5),
