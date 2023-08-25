@@ -163,3 +163,11 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": True,
     "TOKEN_OBTAIN_SERIALIZER": "users.serializers.TokenObtainPairSerializer",
 }
+
+SPECTACULAR_SETTINGS = {
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayOperationId": True,
+    },
+}
