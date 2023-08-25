@@ -362,13 +362,13 @@ class ProductDetailSerializer(ProductSerializer):
 
         if brand:
             products_list_url = reverse(
-                viewname="brands:brand_product_list",
+                viewname="brands:brand_products",
                 kwargs={"brand_url": brand.url},
             )
             return {
                 "name": brand.name,
                 "absolute_url": brand.get_absolute_url(),
-                "products_list_url": products_list_url,
+                "products_url": products_list_url,
             }
         else:
             return None
@@ -376,13 +376,13 @@ class ProductDetailSerializer(ProductSerializer):
     def get_category_info(self, product):
         category = product.category
         products_list_url = reverse(
-            viewname="categories:category_product_list",
+            viewname="categories:category_products",
             kwargs={"category_id": category.id},
         )
         return {
             "full_name": category.full_name,
             "absolute_url": category.get_absolute_url(),
-            "products_list_url": products_list_url,
+            "products_url": products_list_url,
         }
 
     # fields

@@ -17,21 +17,6 @@ from django_lifecycle import (
 
 from .managers import ProductManager
 
-VISIBILITY_CHOICES = (
-    (True, _("نمایش داده شود")),
-    (False, _("نمایش داده نشود")),
-)
-
-AVAILABILITY_CHOICES = (
-    (True, _("موجود")),
-    (False, _("ناموجود")),
-)
-
-MEDIA_TYPE_CHOICES = (
-    (1, _("عکس")),
-    (2, _("فیلم")),
-)
-
 User = get_user_model()
 
 
@@ -55,6 +40,19 @@ class Product(LifecycleModelMixin, TimeStamp):
         db_table = "product"
 
     objects = ProductManager()
+
+    # choices & constants
+    VISIBLE, AVAILABLE = True, True
+    INVISIBLE, UNAVAILABLE = False, False
+
+    VISIBILITY_CHOICES = (
+        (VISIBLE, _("نمایش داده شود")),
+        (INVISIBLE, _("نمایش داده نشود")),
+    )
+    AVAILABILITY_CHOICES = (
+        (AVAILABLE, _("موجود")),
+        (UNAVAILABLE, _("ناموجود")),
+    )
 
     # methods
     def __str__(self):
@@ -243,6 +241,19 @@ class ProductItem(LifecycleModelMixin, models.Model):
         ordering = ("-is_visible", "-is_available", "-id")
         db_table = "product_item"
 
+    # choices & constants
+    VISIBLE, AVAILABLE = True, True
+    INVISIBLE, UNAVAILABLE = False, False
+
+    VISIBILITY_CHOICES = (
+        (VISIBLE, _("نمایش داده شود")),
+        (INVISIBLE, _("نمایش داده نشود")),
+    )
+    AVAILABILITY_CHOICES = (
+        (AVAILABLE, _("موجود")),
+        (UNAVAILABLE, _("ناموجود")),
+    )
+
     # methods
     def __str__(self):
         return f"{self.product} | {self.selling_price}"
@@ -324,6 +335,15 @@ class ProductMedia(LifecycleModelMixin, models.Model):
     class Meta:
         ordering = ("-id",)
         db_table = "product_media"
+
+    # choices & constants
+    IMAGE = 1
+    VIDEO = 2
+
+    MEDIA_TYPE_CHOICES = (
+        (IMAGE, _("عکس")),
+        (VIDEO, _("فیلم")),
+    )
 
     # methods
     def __str__(self):

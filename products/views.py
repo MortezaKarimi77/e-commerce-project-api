@@ -2,7 +2,7 @@ from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 
-from .mixins import (
+from .viewmixins import (
     AttributeAPIViewMixin,
     AttributeValueAPIViewMixin,
     ProductAPIViewMixin,
@@ -30,10 +30,9 @@ class ProductDetailUpdateDelete(ProductAPIViewMixin, RetrieveUpdateDestroyAPIVie
     def get_object(self):
         category_id = self.kwargs["category_id"]
         product_url = self.kwargs["product_url"]
-
         cache_key = f"product_{product_url}"
-        cached_object = cache.get(key=cache_key)
 
+        cached_object = cache.get(key=cache_key)
         if cached_object is None:
             queryset = self.get_queryset()
             product = get_object_or_404(
