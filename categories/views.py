@@ -1,4 +1,3 @@
-from django.core.cache import cache
 from rest_framework.generics import (
     ListAPIView,
     ListCreateAPIView,
@@ -23,20 +22,7 @@ class CategoryDetailUpdateDelete(CategoryAPIViewMixin, RetrieveUpdateDestroyAPIV
     serializer_class = CategoryDetailSerializer
     lookup_field = "id"
     lookup_url_kwarg = "category_id"
-    http_method_names = ("get", "patch", "delete")
-
-    def get_object(self):
-        category_id = self.kwargs["category_id"]
-        cache_key = f"category_{category_id}"
-
-        cached_object = cache.get(key=cache_key)
-        if cached_object is None:
-            category = super().get_object()
-            cached_object = cache.get_or_set(
-                key=cache_key, default=category, timeout=None
-            )
-
-        return cached_object
+    # http_method_names = ("get", "patch", "delete")
 
 
 class CategoryProductList(ListAPIView):

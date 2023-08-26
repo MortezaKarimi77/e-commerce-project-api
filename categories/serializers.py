@@ -7,7 +7,6 @@ from .models import Category
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    # methods
     def validate(self, data):
         category = self.instance
         category_id = category.id if category else None
@@ -42,7 +41,6 @@ class CategorySerializer(serializers.ModelSerializer):
             kwargs={"category_id": category.id},
         )
 
-    # fields
     absolute_url = serializers.CharField(
         source="get_absolute_url",
         read_only=True,
@@ -103,15 +101,18 @@ class CategoryListSerializer(CategorySerializer):
     )
 
 
-class CategoryDetailSerializer(CategorySerializer):
+class CategoryDetailSerializer(CategoryListSerializer):
     class Meta:
         model = Category
         fields = "__all__"
 
+        extra_kwargs = {
+            "parent_category": {
+                "write_only": True,
+            },
+        }
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        parent_category_info = representation.get("parent_category_info")
-
-        if parent_category_info:
-            representation.move_to_end(key="parent_category_info")
+        representation.move_to_end(key="parent_category_info")
         return representation
