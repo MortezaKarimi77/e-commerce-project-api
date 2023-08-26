@@ -7,11 +7,9 @@ class Promotion(models.Model):
         ordering = ("-end_datetime",)
         db_table = "promotion"
 
-    # methods
     def __str__(self):
         return f"{self.name} - {self.discount_rate}%"
 
-    # fields
     category = models.ManyToManyField(
         verbose_name=_("دسته‌بندی"),
         to="categories.Category",

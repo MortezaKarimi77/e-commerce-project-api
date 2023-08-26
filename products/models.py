@@ -1,35 +1,20 @@
 from django.contrib.auth import get_user_model
-from django.core import validators
-from django.core.cache import cache
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.urls import reverse
-from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-from django_lifecycle import (
-    AFTER_CREATE,
-    AFTER_DELETE,
-    AFTER_SAVE,
-    BEFORE_SAVE,
-    BEFORE_UPDATE,
-    LifecycleModelMixin,
-    hook,
-)
+from django_lifecycle import LifecycleModelMixin
 
 from core.models import TimeStamp
+from core.utils import product_directory_path
 
 from .managers import ProductManager
+from .modelmixins import ProductItemModelMixin, ProductModelMixin
 
 User = get_user_model()
 
 
-class Product(LifecycleModelMixin, TimeStamp):
-    class Meta:
-        ordering = ("-is_visible", "-is_available", "-id")
-        db_table = "product"
-
-    objects = ProductManager()
-
-    # choices & constants
+class Product(LifecycleModelMixin, ProductModelMixin, TimeStamp):
     VISIBLE, AVAILABLE = True, True
     INVISIBLE, UNAVAILABLE = False, False
 
@@ -42,14 +27,12 @@ class Product(LifecycleModelMixin, TimeStamp):
         (UNAVAILABLE, _("ناموجود")),
     )
 
-    # methods
+    class Meta:
+        ordering = ("-is_visible", "-is_available", "-id")
+        db_table = "product"
+
     def __str__(self):
         return self.name
-
-    def get_upload_path(self, filename):
-        category = self.category.media_folder_name
-        product = self.url.replace("-", " ").strip()
-        return f"products/{category}/{product}/{filename}"
 
     def get_absolute_url(self):
         return reverse(
@@ -57,55 +40,8 @@ class Product(LifecycleModelMixin, TimeStamp):
             kwargs={"category_id": self.category.id, "product_url": self.url},
         )
 
-    # hooks
-    @hook(BEFORE_SAVE)
-    def find_cheapest_product_item(self):
-        cheapest_product_item = (
-            self.items.filter(
-                inventory__gt=0,
-                is_visible=True,
-                is_available=True,
-            )
-            .order_by("selling_price")
-            .first()
-        )
-        if cheapest_product_item:
-            self.cheapest_product_item = cheapest_product_item
-        else:
-            self.cheapest_product_item = None
+    objects = ProductManager()
 
-    @hook(BEFORE_SAVE)
-    def set_metadate(self):
-        if not self.meta_title:
-            self.meta_title = self.name
-        if not self.meta_description:
-            self.meta_description = self.introduction
-
-    @hook(BEFORE_SAVE)
-    def set_url(self):
-        if not self.url:
-            self.url = slugify(value=self.name, allow_unicode=True)
-
-    @hook(BEFORE_UPDATE, when="main_image", has_changed=True)
-    def delete_old_image(self):
-        old_image = self._meta.model.objects.get(id=self.id).main_image
-        old_image.delete(save=False)
-
-    @hook(AFTER_SAVE)
-    @hook(AFTER_DELETE)
-    def clear_cache(self):
-        category = self.category
-        brand = self.brand
-
-        cache.delete(key="all_products")
-        cache.delete(key="visible_products")
-        cache.delete(key=f"product_{self.url}")
-        cache.delete(key=f"category_{category.id}_all_products")
-        cache.delete(key=f"category_{category.id}_visible_products")
-        cache.delete(key=f"brand_{brand.url if brand else None}_all_products")
-        cache.delete(key=f"brand_{brand.url if brand else None}_visible_products")
-
-    # fields
     category = models.ForeignKey(
         verbose_name=_("دسته‌بندی"),
         related_name="products",
@@ -162,7 +98,7 @@ class Product(LifecycleModelMixin, TimeStamp):
     )
     main_image = models.ImageField(
         verbose_name=_("تصویر اصلی"),
-        upload_to=get_upload_path,
+        upload_to=product_directory_path,
     )
     is_available = models.BooleanField(
         verbose_name=_("وضعیت موجودی"),
@@ -203,8 +139,8 @@ class Product(LifecycleModelMixin, TimeStamp):
         default=0,
         editable=False,
         validators=(
-            validators.MinValueValidator(0),
-            validators.MaxValueValidator(5),
+            MinValueValidator(0),
+            MaxValueValidator(5),
         ),
     )
     comments_count = models.IntegerField(
@@ -224,12 +160,7 @@ class Product(LifecycleModelMixin, TimeStamp):
     )
 
 
-class ProductItem(LifecycleModelMixin, models.Model):
-    class Meta:
-        ordering = ("-is_visible", "-is_available", "-id")
-        db_table = "product_item"
-
-    # choices & constants
+class ProductItem(LifecycleModelMixin, ProductItemModelMixin, models.Model):
     VISIBLE, AVAILABLE = True, True
     INVISIBLE, UNAVAILABLE = False, False
 
@@ -242,7 +173,10 @@ class ProductItem(LifecycleModelMixin, models.Model):
         (UNAVAILABLE, _("ناموجود")),
     )
 
-    # methods
+    class Meta:
+        ordering = ("-is_visible", "-is_available", "-id")
+        db_table = "product_item"
+
     def __str__(self):
         return f"{self.product} | {self.selling_price}"
 
@@ -252,24 +186,6 @@ class ProductItem(LifecycleModelMixin, models.Model):
             kwargs={"product_item_id": self.id},
         )
 
-    # hooks
-    @hook(AFTER_CREATE)
-    @hook(AFTER_SAVE)
-    @hook(AFTER_DELETE)
-    def update_cheapest_product_item(self):
-        self.product.save()
-
-    @hook(BEFORE_SAVE)
-    def set_selling_price(self):
-        if not self.selling_price:
-            self.selling_price = self.original_price
-
-    @hook(BEFORE_SAVE)
-    def set_availability(self):
-        if self.inventory == 0:
-            self.is_available = False
-
-    # fields
     product = models.ForeignKey(
         verbose_name=_("محصول"),
         related_name="items",
@@ -320,11 +236,6 @@ class ProductItem(LifecycleModelMixin, models.Model):
 
 
 class ProductMedia(LifecycleModelMixin, models.Model):
-    class Meta:
-        ordering = ("-id",)
-        db_table = "product_media"
-
-    # choices & constants
     IMAGE = 1
     VIDEO = 2
 
@@ -333,14 +244,12 @@ class ProductMedia(LifecycleModelMixin, models.Model):
         (VIDEO, _("فیلم")),
     )
 
-    # methods
+    class Meta:
+        ordering = ("-id",)
+        db_table = "product_media"
+
     def __str__(self):
         return f"{self.product} | {self.file}"
-
-    def get_upload_path(self, filename):
-        category = self.product.category.media_folder_name
-        product = self.product.url.replace("-", " ").strip()
-        return f"products/{category}/{product}/{filename}"
 
     def get_absolute_url(self):
         return reverse(
@@ -348,13 +257,6 @@ class ProductMedia(LifecycleModelMixin, models.Model):
             kwargs={"product_media_id": self.id},
         )
 
-    # hooks
-    @hook(BEFORE_UPDATE, when="file", has_changed=True)
-    def delete_old_file(self):
-        old_file = self._meta.model.objects.get(id=self.id).file
-        old_file.delete(save=False)
-
-    # fields
     product = models.ForeignKey(
         verbose_name=_("محصول"),
         related_name="media_files",
@@ -364,7 +266,7 @@ class ProductMedia(LifecycleModelMixin, models.Model):
     )
     file = models.FileField(
         verbose_name="فایل",
-        upload_to=get_upload_path,
+        upload_to=product_directory_path,
     )
     type = models.IntegerField(
         verbose_name=_("نوع فایل"),
@@ -382,7 +284,6 @@ class Attribute(models.Model):
         ordering = ("name",)
         db_table = "attribute"
 
-    # methods
     def __str__(self):
         return f"{self.category.full_name} - {self.name}"
 
@@ -392,7 +293,6 @@ class Attribute(models.Model):
             kwargs={"attribute_id": self.id},
         )
 
-    # fields
     category = models.ForeignKey(
         verbose_name=_("دسته‌بندی"),
         related_name="attributes",
@@ -412,7 +312,6 @@ class AttributeValue(models.Model):
         ordering = ("attribute",)
         db_table = "attribute_value"
 
-    # methods
     def __str__(self):
         model_fields = self._meta.get_fields()
 
@@ -431,7 +330,6 @@ class AttributeValue(models.Model):
             kwargs={"attribute_value_id": self.id},
         )
 
-    # fields
     attribute = models.ForeignKey(
         verbose_name=_("ویژگی"),
         related_name="values",

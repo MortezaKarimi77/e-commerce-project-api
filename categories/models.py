@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import Index
 from django.db.models.functions import Lower
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django_lifecycle import LifecycleModelMixin
 
@@ -21,6 +22,15 @@ class Category(LifecycleModelMixin, CategoryModelMixin, TimeStamp):
         )
 
         indexes = (Index(Lower("name"), name="lower_category_name_idx"),)
+
+    def __str__(self) -> str:
+        return self.full_name
+
+    def get_absolute_url(self) -> str:
+        return reverse(
+            viewname="categories:category_detail_update_delete",
+            kwargs={"category_id": self.id},
+        )
 
     parent_category = models.ForeignKey(
         verbose_name="دسته‌بندی والد",

@@ -3,11 +3,6 @@ from django_lifecycle import AFTER_CREATE, BEFORE_CREATE, BEFORE_DELETE, hook
 
 
 class CommentModelMixin:
-    # methods
-    def __str__(self):
-        return f"{self.user.get_full_name()} - {self.text:20} ..."
-
-    # hooks
     @hook(BEFORE_CREATE)
     def set_is_buyer(self):
         user_is_buyer = self.user.purchased_products.filter(

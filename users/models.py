@@ -11,11 +11,9 @@ class WishList(models.Model):
         unique_together = ("user", "product")
         db_table = "wishlist"
 
-    # methods
     def __str__(self) -> str:
         return f"{self.user.get_full_name()} - {self.product.name}"
 
-    # fields
     user = models.ForeignKey(
         verbose_name=_("کاربر"),
         related_name="wishlist",
@@ -37,11 +35,9 @@ class PurchasedProducts(models.Model):
         verbose_name_plural = "Purchased Products"
         db_table = "purchased_products"
 
-    # methods
     def __str__(self) -> str:
         return f"{self.user.get_full_name()} - {self.product.name}"
 
-    # fields
     user = models.ForeignKey(
         verbose_name=_("کاربر"),
         related_name="purchased_products",

@@ -15,6 +15,9 @@ class Comment(LifecycleModelMixin, CommentModelMixin, models.Model):
         unique_together = ("user", "product")
         db_table = "comment"
 
+    def __str__(self):
+        return f"{self.user.get_full_name()} - {self.text:20} ..."
+
     user = models.ForeignKey(
         verbose_name=_("کاربر"),
         related_name="comments",

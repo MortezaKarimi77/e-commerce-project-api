@@ -1,21 +1,9 @@
 from django.core.cache import cache
-from django.urls import reverse
 from django.utils.text import slugify
 from django_lifecycle import AFTER_DELETE, AFTER_SAVE, BEFORE_SAVE, BEFORE_UPDATE, hook
 
 
 class BrandModelMixin:
-    # methods
-    def __str__(self) -> str:
-        return self.name
-
-    def get_absolute_url(self) -> str:
-        return reverse(
-            viewname="brands:brand_detail_update_delete",
-            kwargs={"brand_url": self.url},
-        )
-
-    # hooks
     @hook(BEFORE_SAVE)
     def set_metadate(self):
         if not self.meta_title:

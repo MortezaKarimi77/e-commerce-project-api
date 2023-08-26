@@ -1,22 +1,11 @@
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
-from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django_lifecycle import AFTER_DELETE, AFTER_SAVE, BEFORE_SAVE, hook
 
 
 class CategoryModelMixin:
-    # methods
-    def __str__(self) -> str:
-        return self.full_name
-
-    def get_absolute_url(self) -> str:
-        return reverse(
-            viewname="categories:category_detail_update_delete",
-            kwargs={"category_id": self.id},
-        )
-
     def validate_unique(self, exclude):
         other_categories = self._meta.model.objects.exclude(id=self.id)
         category = other_categories.filter(parent_category=None, url=self.url)
@@ -30,7 +19,6 @@ class CategoryModelMixin:
         if self == self.parent_category:
             raise ValidationError(_("یک دسته‌بندی نمی‌تواند زیردسته خودش باشد"))
 
-    # hooks
     @hook(BEFORE_SAVE)
     def set_metadate(self):
         if not self.meta_title:

@@ -162,7 +162,7 @@ class Migration(migrations.Migration):
                 (
                     "main_image",
                     models.ImageField(
-                        upload_to=products.models.Product.get_upload_path,
+                        upload_to=products.models.product_directory_path,
                         verbose_name="تصویر اصلی",
                     ),
                 ),
@@ -276,7 +276,7 @@ class Migration(migrations.Migration):
                 (
                     "file",
                     models.FileField(
-                        upload_to=products.models.ProductMedia.get_upload_path,
+                        upload_to=products.models.product_directory_path,
                         verbose_name="فایل",
                     ),
                 ),
