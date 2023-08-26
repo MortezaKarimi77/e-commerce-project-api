@@ -1,13 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django_lifecycle import (
-    BEFORE_CREATE,
-    BEFORE_SAVE,
-    BEFORE_UPDATE,
-    LifecycleModelMixin,
-    hook,
-)
+from django_lifecycle import LifecycleModelMixin
+
+from .modelmixins import AddressModelMixin, OrderItemModelMixin, OrderModelMixin
 
 User = get_user_model()
 
@@ -17,11 +13,9 @@ class PaymentMethod(models.Model):
         ordering = ("name",)
         db_table = "payment_method"
 
-    # methods
     def __str__(self):
         return self.name
 
-    # fields
     name = models.CharField(
         verbose_name=_("نام"),
         max_length=50,
@@ -38,11 +32,9 @@ class ShippingMethod(models.Model):
         ordering = ("name",)
         db_table = "shipping_method"
 
-    # methods
     def __str__(self):
         return self.name
 
-    # fields
     name = models.CharField(
         verbose_name=_("نام"),
         max_length=50,
@@ -61,12 +53,6 @@ class ShippingMethod(models.Model):
 
 
 class OrderStatus(models.Model):
-    class Meta:
-        ordering = ("status",)
-        verbose_name_plural = "Order Statuses"
-        db_table = "order_status"
-
-    # choices & constants
     FAILED = 0
     SUCCESSFUL = 1
     PROCESSING = 2
@@ -81,11 +67,14 @@ class OrderStatus(models.Model):
         (DELIVERED, _("تحویل داده شده")),
     )
 
-    # methods
+    class Meta:
+        ordering = ("status",)
+        verbose_name_plural = "Order Statuses"
+        db_table = "order_status"
+
     def __str__(self):
         return self.get_status_display()
 
-    # fields
     status = models.IntegerField(
         verbose_name=_("وضعیت سفارش"),
         choices=ORDER_STATUS_CHOICES,
@@ -97,11 +86,9 @@ class Region(models.Model):
         ordering = ("name",)
         db_table = "region"
 
-    # methods
     def __str__(self):
         return self.name
 
-    # fields
     name = models.CharField(
         verbose_name=_("استان"),
         max_length=50,
@@ -116,11 +103,9 @@ class City(models.Model):
         verbose_name_plural = "Cities"
         db_table = "city"
 
-    # methods
     def __str__(self):
         return f"{self.region}, {self.name}"
 
-    # fields
     region = models.ForeignKey(
         verbose_name="استان",
         related_name="cities",
@@ -135,33 +120,14 @@ class City(models.Model):
     )
 
 
-class Address(LifecycleModelMixin, models.Model):
+class Address(LifecycleModelMixin, AddressModelMixin, models.Model):
     class Meta:
         db_table = "address"
         verbose_name_plural = "Addresses"
 
-    # methods
     def __str__(self) -> str:
         return f"{self.city}, {self.address}"
 
-    # hooks
-    @hook(BEFORE_SAVE)
-    def set_receiver_name(self):
-        if not self.receiver_first_name:
-            self.receiver_first_name = self.user.first_name
-        if not self.receiver_last_name:
-            self.receiver_last_name = self.user.last_name
-
-    @hook(BEFORE_SAVE, when="is_default", was=False, is_now=True)
-    def set_default_address(self):
-        previous_default_address = self.user.addresses.exclude(
-            id=self.id,
-        ).exclude(
-            is_default=False,
-        )
-        previous_default_address.update(is_default=False)
-
-    # fileds
     user = models.ForeignKey(
         verbose_name=_("کاربر"),
         related_name="addresses",
@@ -223,30 +189,17 @@ class Address(LifecycleModelMixin, models.Model):
     )
 
 
-class Order(LifecycleModelMixin, models.Model):
+class Order(LifecycleModelMixin, OrderModelMixin, models.Model):
     class Meta:
         ordering = ("-create_datetime",)
         db_table = "order"
 
-    # methods
     def __str__(self):
         return f"{self.user} | {self.payment_datetime}"
 
-    # hooks
-    @hook(BEFORE_CREATE)
-    @hook(BEFORE_UPDATE, when="order_code", has_changed=True)
-    def set_order_code(self):
-        self.order_code = self.id
-
-    @hook(BEFORE_CREATE)
-    @hook(BEFORE_UPDATE, when="shipping_cost", has_changed=True)
-    def set_shipping_cost(self):
-        self.shipping_cost = self.shipping_method.cost
-
-    # fields
     order_code = models.BigIntegerField(
         verbose_name=_("کد سفارش"),
-        # editable=False,
+        editable=False,
         db_index=True,
     )
     tracking_code = models.CharField(
@@ -298,7 +251,6 @@ class Order(LifecycleModelMixin, models.Model):
         verbose_name=_("هزینه ارسال"),
         max_digits=10,
         decimal_places=3,
-        # blank=True,
     )
     total_cost = models.DecimalField(
         verbose_name=_("مبلغ کل"),
@@ -322,27 +274,14 @@ class Order(LifecycleModelMixin, models.Model):
     )
 
 
-class OrderItem(LifecycleModelMixin, models.Model):
+class OrderItem(LifecycleModelMixin, OrderItemModelMixin, models.Model):
     class Meta:
         unique_together = ("order", "product_item")
         db_table = "order_item"
 
-    # methods
     def __str__(self):
         return f"{self.name} | {self.order}"
 
-    # hooks
-    @hook(BEFORE_CREATE)
-    def set_price(self):
-        selling_price = self.product_item.selling_price
-        self.price = selling_price
-        self.total_price = selling_price * self.quantity
-
-    @hook(BEFORE_CREATE)
-    def set_name(self):
-        self.name = self.product_item.product.name
-
-    # fields
     user = models.ForeignKey(
         verbose_name=_("کاربر"),
         to=User,
