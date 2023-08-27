@@ -15,14 +15,12 @@ class AttributeSerializer(serializers.ModelSerializer):
             },
         }
 
-    # methods
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation.move_to_end("absolute_url")
         representation.move_to_end("category_url")
         return representation
 
-    # fields
     category_full_name = serializers.CharField(
         source="category.full_name",
         read_only=True,
@@ -48,14 +46,12 @@ class AttributeValueSerializer(serializers.ModelSerializer):
             },
         }
 
-    # methods
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation.move_to_end("absolute_url")
         representation.move_to_end("attribute_url")
         return representation
 
-    # fields
     attribute_name = serializers.CharField(
         source="attribute.name",
         read_only=True,
@@ -87,7 +83,6 @@ class ConfigurationSerializer(serializers.ModelSerializer):
             "time_value",
         )
 
-    # fields
     attribute_name = serializers.CharField(
         source="attribute.name",
         read_only=True,
@@ -95,7 +90,6 @@ class ConfigurationSerializer(serializers.ModelSerializer):
 
 
 class ProductItemSerializer(serializers.ModelSerializer):
-    # fields
     product_name = serializers.CharField(
         source="product.name",
         read_only=True,
@@ -157,7 +151,6 @@ class ProductItemDetailSerializer(ProductItemSerializer):
             },
         }
 
-    # methods
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation.move_to_end("product_item_configuration")
@@ -167,7 +160,6 @@ class ProductItemDetailSerializer(ProductItemSerializer):
         product_items = product_item.configuration.select_related("attribute")
         return ConfigurationSerializer(instance=product_items, many=True).data
 
-    # fields
     product_item_configuration = serializers.SerializerMethodField(
         method_name="get_product_item_configuration",
     )
@@ -202,7 +194,6 @@ class ProductMediaSerializer(serializers.ModelSerializer):
             },
         }
 
-    # methods
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         user = self.context["request"].user
@@ -214,7 +205,6 @@ class ProductMediaSerializer(serializers.ModelSerializer):
 
         return representation
 
-    # fields
     type_name = serializers.CharField(
         source="get_type_display",
         read_only=True,
@@ -230,7 +220,6 @@ class ProductMediaSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    # fields
     absolute_url = serializers.CharField(
         source="get_absolute_url",
         read_only=True,
@@ -302,7 +291,6 @@ class ProductListSerializer(ProductSerializer):
             },
         }
 
-    # fields
     category_full_name = serializers.CharField(
         source="category.full_name",
         read_only=True,
@@ -335,7 +323,6 @@ class ProductDetailSerializer(ProductSerializer):
             },
         }
 
-    # methods
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         user = self.context["request"].user
@@ -385,7 +372,6 @@ class ProductDetailSerializer(ProductSerializer):
             "products_url": products_list_url,
         }
 
-    # fields
     brand_info = serializers.SerializerMethodField(
         method_name="get_brand_info",
     )
