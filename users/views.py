@@ -1,4 +1,3 @@
-from django.core.cache import cache
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -33,17 +32,6 @@ class UserDetailUpdateDelete(UserAPIViewMixin, RetrieveUpdateDestroyAPIView):
     private_permission_classes = (IsAdminUser,)
     public_permission_classes = (IsAuthenticated, IsUserOwner)
     http_method_names = ("get", "patch", "delete")
-
-    def get_object(self):
-        username = self.kwargs["username"]
-        cache_key = f"user_{username}"
-
-        cached_object = cache.get(key=cache_key)
-        if cached_object is None:
-            user = super().get_object()
-            cached_object = cache.get_or_set(key=cache_key, default=user, timeout=None)
-
-        return cached_object
 
     def get_serializer_class(self, *args, **kwargs):
         if self.request.user.is_staff:
