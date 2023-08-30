@@ -1,5 +1,6 @@
-from django.core.cache import cache
 from django.db import models
+
+from core.utils import get_cached_queryset
 
 
 class ProductManager(models.Manager):
@@ -16,9 +17,7 @@ class ProductManager(models.Manager):
             products = self.filter(is_visible=True)
             cache_key = "visible_products"
 
-        cached_queryset = cache.get_or_set(
-            key=cache_key, default=products, timeout=None
-        )
+        cached_queryset = get_cached_queryset(queryset=products, cache_key=cache_key)
         return cached_queryset
 
     def brand_products(self, brand_url, user):
@@ -29,8 +28,8 @@ class ProductManager(models.Manager):
             brand_products = self.filter(brand__url=brand_url, is_visible=True)
             cache_key = f"brand_{brand_url}_visible_products"
 
-        cached_queryset = cache.get_or_set(
-            key=cache_key, default=brand_products, timeout=None
+        cached_queryset = get_cached_queryset(
+            queryset=brand_products, cache_key=cache_key
         )
         return cached_queryset
 
@@ -42,7 +41,7 @@ class ProductManager(models.Manager):
             category_products = self.filter(category=category_id, is_visible=True)
             cache_key = f"category_{category_id}_visible_products"
 
-        cached_queryset = cache.get_or_set(
-            key=cache_key, default=category_products, timeout=None
+        cached_queryset = get_cached_queryset(
+            queryset=category_products, cache_key=cache_key
         )
         return cached_queryset

@@ -2,18 +2,18 @@ from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 
+from .serializers import (
+    ProductDetailSerializer,
+    ProductItemDetailSerializer,
+    ProductItemListSerializer,
+    ProductListSerializer,
+)
 from .viewmixins import (
     AttributeAPIViewMixin,
     AttributeValueAPIViewMixin,
     ProductAPIViewMixin,
     ProductItemAPIViewMixin,
     ProductMediaAPIViewMixin,
-)
-from .serializers import (
-    ProductDetailSerializer,
-    ProductItemDetailSerializer,
-    ProductItemListSerializer,
-    ProductListSerializer,
 )
 
 

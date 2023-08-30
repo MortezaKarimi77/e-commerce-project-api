@@ -22,7 +22,7 @@ class CategoryDetailUpdateDelete(CategoryAPIViewMixin, RetrieveUpdateDestroyAPIV
     serializer_class = CategoryDetailSerializer
     lookup_field = "id"
     lookup_url_kwarg = "category_id"
-    # http_method_names = ("get", "patch", "delete")
+    http_method_names = ("get", "patch", "delete")
 
 
 class CategoryProductList(ListAPIView):
@@ -33,6 +33,5 @@ class CategoryProductList(ListAPIView):
     def get_queryset(self):
         user = self.request.user
         category_id = self.kwargs["category_id"]
-
         queryset = Product.objects.category_products(category_id=category_id, user=user)
         return queryset
