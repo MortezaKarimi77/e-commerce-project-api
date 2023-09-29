@@ -6,14 +6,6 @@ User = get_user_model()
 
 
 class WishList(models.Model):
-    class Meta:
-        ordering = ("-id",)
-        unique_together = ("user", "product")
-        db_table = "wishlist"
-
-    def __str__(self) -> str:
-        return f"{self.user.get_full_name()} - {self.product.name}"
-
     user = models.ForeignKey(
         verbose_name=_("کاربر"),
         related_name="wishlist",
@@ -27,17 +19,16 @@ class WishList(models.Model):
         on_delete=models.CASCADE,
     )
 
-
-class PurchasedProducts(models.Model):
     class Meta:
         ordering = ("-id",)
         unique_together = ("user", "product")
-        verbose_name_plural = "Purchased Products"
-        db_table = "purchased_products"
+        db_table = "wishlist"
 
     def __str__(self) -> str:
         return f"{self.user.get_full_name()} - {self.product.name}"
 
+
+class PurchasedProducts(models.Model):
     user = models.ForeignKey(
         verbose_name=_("کاربر"),
         related_name="purchased_products",
@@ -51,3 +42,12 @@ class PurchasedProducts(models.Model):
         to="products.Product",
         on_delete=models.CASCADE,
     )
+
+    class Meta:
+        ordering = ("-id",)
+        unique_together = ("user", "product")
+        verbose_name_plural = "Purchased Products"
+        db_table = "purchased_products"
+
+    def __str__(self) -> str:
+        return f"{self.user.get_full_name()} - {self.product.name}"

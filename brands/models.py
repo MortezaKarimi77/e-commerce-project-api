@@ -11,24 +11,6 @@ from .modelmixins import BrandModelMixin
 
 
 class Brand(LifecycleModelMixin, BrandModelMixin, models.Model):
-    class Meta:
-        ordering = ("name",)
-        db_table = "brand"
-
-        indexes = (
-            Index(Lower("name"), name="lower_brand_name_idx"),
-            Index(Lower("country"), name="lower_brand_country_idx"),
-        )
-
-    def __str__(self) -> str:
-        return self.name
-
-    def get_absolute_url(self) -> str:
-        return reverse(
-            viewname="brands:brand_detail_update_delete",
-            kwargs={"brand_url": self.url},
-        )
-
     name = models.CharField(
         verbose_name=_("نام"),
         max_length=100,
@@ -71,3 +53,21 @@ class Brand(LifecycleModelMixin, BrandModelMixin, models.Model):
         verbose_name=_("تاریخ و زمان آخرین ویرایش"),
         auto_now=True,
     )
+
+    class Meta:
+        ordering = ("name",)
+        db_table = "brand"
+
+        indexes = (
+            Index(Lower("name"), name="lower_brand_name_idx"),
+            Index(Lower("country"), name="lower_brand_country_idx"),
+        )
+
+    def __str__(self) -> str:
+        return self.name
+
+    def get_absolute_url(self) -> str:
+        return reverse(
+            viewname="brands:brand_detail_update_delete",
+            kwargs={"brand_url": self.url},
+        )

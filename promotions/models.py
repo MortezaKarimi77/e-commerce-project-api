@@ -3,13 +3,6 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Promotion(models.Model):
-    class Meta:
-        ordering = ("-end_datetime",)
-        db_table = "promotion"
-
-    def __str__(self):
-        return f"{self.name} - {self.discount_rate}%"
-
     category = models.ManyToManyField(
         verbose_name=_("دسته‌بندی"),
         to="categories.Category",
@@ -38,3 +31,10 @@ class Promotion(models.Model):
     end_datetime = models.DateTimeField(
         verbose_name=_("تاریخ و زمان پایان"),
     )
+
+    class Meta:
+        ordering = ("-end_datetime",)
+        db_table = "promotion"
+
+    def __str__(self):
+        return f"{self.name} - {self.discount_rate}%"

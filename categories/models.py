@@ -11,27 +11,6 @@ from .modelmixins import CategoryModelMixin
 
 
 class Category(LifecycleModelMixin, CategoryModelMixin, TimeStamp):
-    class Meta:
-        ordering = ("name",)
-        verbose_name_plural = "Categories"
-        db_table = "category"
-
-        unique_together = (
-            ("parent_category", "name"),
-            ("parent_category", "url"),
-        )
-
-        indexes = (Index(Lower("name"), name="lower_category_name_idx"),)
-
-    def __str__(self) -> str:
-        return self.full_name
-
-    def get_absolute_url(self) -> str:
-        return reverse(
-            viewname="categories:category_detail_update_delete",
-            kwargs={"category_id": self.id},
-        )
-
     parent_category = models.ForeignKey(
         verbose_name="دسته‌بندی والد",
         related_name="subcategories",
@@ -74,3 +53,24 @@ class Category(LifecycleModelMixin, CategoryModelMixin, TimeStamp):
         verbose_name=_("نام پوشه مدیا"),
         max_length=100,
     )
+
+    class Meta:
+        ordering = ("name",)
+        verbose_name_plural = "Categories"
+        db_table = "category"
+
+        unique_together = (
+            ("parent_category", "name"),
+            ("parent_category", "url"),
+        )
+
+        indexes = (Index(Lower("name"), name="lower_category_name_idx"),)
+
+    def __str__(self) -> str:
+        return self.full_name
+
+    def get_absolute_url(self) -> str:
+        return reverse(
+            viewname="categories:category_detail_update_delete",
+            kwargs={"category_id": self.id},
+        )

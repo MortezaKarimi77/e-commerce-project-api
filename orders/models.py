@@ -9,13 +9,6 @@ User = get_user_model()
 
 
 class PaymentMethod(models.Model):
-    class Meta:
-        ordering = ("name",)
-        db_table = "payment_method"
-
-    def __str__(self):
-        return self.name
-
     name = models.CharField(
         verbose_name=_("نام"),
         max_length=50,
@@ -26,15 +19,15 @@ class PaymentMethod(models.Model):
         blank=True,
     )
 
-
-class ShippingMethod(models.Model):
     class Meta:
         ordering = ("name",)
-        db_table = "shipping_method"
+        db_table = "payment_method"
 
     def __str__(self):
         return self.name
 
+
+class ShippingMethod(models.Model):
     name = models.CharField(
         verbose_name=_("نام"),
         max_length=50,
@@ -50,6 +43,13 @@ class ShippingMethod(models.Model):
         decimal_places=3,
         default=0,
     )
+
+    class Meta:
+        ordering = ("name",)
+        db_table = "shipping_method"
+
+    def __str__(self):
+        return self.name
 
 
 class OrderStatus(models.Model):
@@ -67,6 +67,11 @@ class OrderStatus(models.Model):
         (DELIVERED, _("تحویل داده شده")),
     )
 
+    status = models.IntegerField(
+        verbose_name=_("وضعیت سفارش"),
+        choices=ORDER_STATUS_CHOICES,
+    )
+
     class Meta:
         ordering = ("status",)
         verbose_name_plural = "Order Statuses"
@@ -75,13 +80,14 @@ class OrderStatus(models.Model):
     def __str__(self):
         return self.get_status_display()
 
-    status = models.IntegerField(
-        verbose_name=_("وضعیت سفارش"),
-        choices=ORDER_STATUS_CHOICES,
-    )
-
 
 class Region(models.Model):
+    name = models.CharField(
+        verbose_name=_("استان"),
+        max_length=50,
+        unique=True,
+    )
+
     class Meta:
         ordering = ("name",)
         db_table = "region"
@@ -89,23 +95,8 @@ class Region(models.Model):
     def __str__(self):
         return self.name
 
-    name = models.CharField(
-        verbose_name=_("استان"),
-        max_length=50,
-        unique=True,
-    )
-
 
 class City(models.Model):
-    class Meta:
-        ordering = ("name",)
-        unique_together = ("region", "name")
-        verbose_name_plural = "Cities"
-        db_table = "city"
-
-    def __str__(self):
-        return f"{self.region}, {self.name}"
-
     region = models.ForeignKey(
         verbose_name="استان",
         related_name="cities",
@@ -119,15 +110,17 @@ class City(models.Model):
         db_index=True,
     )
 
+    class Meta:
+        ordering = ("name",)
+        unique_together = ("region", "name")
+        verbose_name_plural = "Cities"
+        db_table = "city"
+
+    def __str__(self):
+        return f"{self.region}, {self.name}"
+
 
 class Address(LifecycleModelMixin, AddressModelMixin, models.Model):
-    class Meta:
-        db_table = "address"
-        verbose_name_plural = "Addresses"
-
-    def __str__(self) -> str:
-        return f"{self.city}, {self.address}"
-
     user = models.ForeignKey(
         verbose_name=_("کاربر"),
         related_name="addresses",
@@ -188,15 +181,15 @@ class Address(LifecycleModelMixin, AddressModelMixin, models.Model):
         default=False,
     )
 
+    class Meta:
+        db_table = "address"
+        verbose_name_plural = "Addresses"
+
+    def __str__(self) -> str:
+        return f"{self.city}, {self.address}"
+
 
 class Order(LifecycleModelMixin, OrderModelMixin, models.Model):
-    class Meta:
-        ordering = ("-create_datetime",)
-        db_table = "order"
-
-    def __str__(self):
-        return f"{self.user} | {self.payment_datetime}"
-
     order_code = models.BigIntegerField(
         verbose_name=_("کد سفارش"),
         editable=False,
@@ -273,15 +266,15 @@ class Order(LifecycleModelMixin, OrderModelMixin, models.Model):
         null=True,
     )
 
-
-class OrderItem(LifecycleModelMixin, OrderItemModelMixin, models.Model):
     class Meta:
-        unique_together = ("order", "product_item")
-        db_table = "order_item"
+        ordering = ("-create_datetime",)
+        db_table = "order"
 
     def __str__(self):
-        return f"{self.name} | {self.order}"
+        return f"{self.user} | {self.payment_datetime}"
 
+
+class OrderItem(LifecycleModelMixin, OrderItemModelMixin, models.Model):
     user = models.ForeignKey(
         verbose_name=_("کاربر"),
         to=User,
@@ -321,3 +314,10 @@ class OrderItem(LifecycleModelMixin, OrderItemModelMixin, models.Model):
         verbose_name=_("تعداد"),
         default=1,
     )
+
+    class Meta:
+        unique_together = ("order", "product_item")
+        db_table = "order_item"
+
+    def __str__(self):
+        return f"{self.name} | {self.order}"

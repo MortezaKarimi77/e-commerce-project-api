@@ -27,21 +27,6 @@ class Product(LifecycleModelMixin, ProductModelMixin, TimeStamp):
         (UNAVAILABLE, _("ناموجود")),
     )
 
-    class Meta:
-        ordering = ("-is_visible", "-is_available", "-id")
-        db_table = "product"
-
-    def __str__(self):
-        return self.name
-
-    def get_absolute_url(self):
-        return reverse(
-            viewname="products:product_detail_update_delete",
-            kwargs={"category_id": self.category.id, "product_url": self.url},
-        )
-
-    objects = ProductManager()
-
     category = models.ForeignKey(
         verbose_name=_("دسته‌بندی"),
         related_name="products",
@@ -159,6 +144,21 @@ class Product(LifecycleModelMixin, ProductModelMixin, TimeStamp):
         editable=False,
     )
 
+    objects = ProductManager()
+
+    class Meta:
+        ordering = ("-is_visible", "-is_available", "-id")
+        db_table = "product"
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse(
+            viewname="products:product_detail_update_delete",
+            kwargs={"category_id": self.category.id, "product_url": self.url},
+        )
+
 
 class ProductItem(LifecycleModelMixin, ProductItemModelMixin, models.Model):
     VISIBLE, AVAILABLE = True, True
@@ -172,19 +172,6 @@ class ProductItem(LifecycleModelMixin, ProductItemModelMixin, models.Model):
         (AVAILABLE, _("موجود")),
         (UNAVAILABLE, _("ناموجود")),
     )
-
-    class Meta:
-        ordering = ("-is_visible", "-is_available", "-id")
-        db_table = "product_item"
-
-    def __str__(self):
-        return f"{self.product} | {self.selling_price}"
-
-    def get_absolute_url(self):
-        return reverse(
-            "products:product_item_detail_update_delete",
-            kwargs={"product_item_id": self.id},
-        )
 
     product = models.ForeignKey(
         verbose_name=_("محصول"),
@@ -234,6 +221,19 @@ class ProductItem(LifecycleModelMixin, ProductItemModelMixin, models.Model):
         choices=VISIBILITY_CHOICES,
     )
 
+    class Meta:
+        ordering = ("-is_visible", "-is_available", "-id")
+        db_table = "product_item"
+
+    def __str__(self):
+        return f"{self.product} | {self.selling_price}"
+
+    def get_absolute_url(self):
+        return reverse(
+            "products:product_item_detail_update_delete",
+            kwargs={"product_item_id": self.id},
+        )
+
 
 class ProductMedia(LifecycleModelMixin, models.Model):
     IMAGE = 1
@@ -243,19 +243,6 @@ class ProductMedia(LifecycleModelMixin, models.Model):
         (IMAGE, _("عکس")),
         (VIDEO, _("فیلم")),
     )
-
-    class Meta:
-        ordering = ("-id",)
-        db_table = "product_media"
-
-    def __str__(self):
-        return f"{self.product} | {self.file}"
-
-    def get_absolute_url(self):
-        return reverse(
-            "products:product_media_detail_update_delete",
-            kwargs={"product_media_id": self.id},
-        )
 
     product = models.ForeignKey(
         verbose_name=_("محصول"),
@@ -278,21 +265,21 @@ class ProductMedia(LifecycleModelMixin, models.Model):
         blank=True,
     )
 
-
-class Attribute(models.Model):
     class Meta:
-        ordering = ("name",)
-        db_table = "attribute"
+        ordering = ("-id",)
+        db_table = "product_media"
 
     def __str__(self):
-        return f"{self.category.full_name} - {self.name}"
+        return f"{self.product} | {self.file}"
 
     def get_absolute_url(self):
         return reverse(
-            "products:attribute_detail_update_delete",
-            kwargs={"attribute_id": self.id},
+            "products:product_media_detail_update_delete",
+            kwargs={"product_media_id": self.id},
         )
 
+
+class Attribute(models.Model):
     category = models.ForeignKey(
         verbose_name=_("دسته‌بندی"),
         related_name="attributes",
@@ -306,30 +293,21 @@ class Attribute(models.Model):
         unique=True,
     )
 
-
-class AttributeValue(models.Model):
     class Meta:
-        ordering = ("attribute",)
-        db_table = "attribute_value"
+        ordering = ("name",)
+        db_table = "attribute"
 
     def __str__(self):
-        model_fields = self._meta.get_fields()
-
-        for field in model_fields:
-            if not field.is_relation:
-                field_name = field.name
-                field_value = getattr(self, field_name)
-                if field_value and field_name != "id":
-                    break
-
-        return f"{self.attribute}: {field_value}"
+        return f"{self.category.full_name} - {self.name}"
 
     def get_absolute_url(self):
         return reverse(
-            "products:attribute_value_detail_update_delete",
-            kwargs={"attribute_value_id": self.id},
+            "products:attribute_detail_update_delete",
+            kwargs={"attribute_id": self.id},
         )
 
+
+class AttributeValue(models.Model):
     attribute = models.ForeignKey(
         verbose_name=_("ویژگی"),
         related_name="values",
@@ -370,3 +348,25 @@ class AttributeValue(models.Model):
         blank=True,
         null=True,
     )
+
+    class Meta:
+        ordering = ("attribute",)
+        db_table = "attribute_value"
+
+    def __str__(self):
+        model_fields = self._meta.get_fields()
+
+        for field in model_fields:
+            if not field.is_relation:
+                field_name = field.name
+                field_value = getattr(self, field_name)
+                if field_value and field_name != "id":
+                    break
+
+        return f"{self.attribute}: {field_value}"
+
+    def get_absolute_url(self):
+        return reverse(
+            "products:attribute_value_detail_update_delete",
+            kwargs={"attribute_value_id": self.id},
+        )
