@@ -1,6 +1,5 @@
-from django.core.cache import cache
-
 from core.permissions import IsAdminOrReadOnly
+from core.utils import get_cached_object, get_cached_queryset
 
 from .models import Brand
 
@@ -13,18 +12,13 @@ class BrandAPIViewMixin:
         brand_url = self.kwargs["brand_url"]
         cache_key = f"brand_{brand_url}"
 
-        cached_object = cache.get(key=cache_key)
-        if cached_object is None:
-            brand = super().get_object()
-            cached_object = cache.get_or_set(key=cache_key, default=brand, timeout=None)
-
+        cached_object = get_cached_object(
+            get_object_function=super().get_object, cache_key=cache_key
+        )
         return cached_object
 
     def get_queryset(self):
         queryset = super().get_queryset()
         cache_key = "brands_queryset"
-
-        cached_queryset = cache.get_or_set(
-            key=cache_key, default=queryset, timeout=None
-        )
+        cached_queryset = get_cached_queryset(queryset=queryset, cache_key=cache_key)
         return cached_queryset
