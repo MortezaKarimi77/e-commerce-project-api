@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
-from .models import Comment
+from .models import Comment, Like
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -65,7 +65,9 @@ class CommentListSerializer(CommentSerializer):
                 validated_data["user"] = user
             return super().create(validated_data)
         except IntegrityError:
-            raise serializers.ValidationError(_("شما قبلا دیدگاه خود را ثبت کرده‌اید"))
+            raise serializers.ValidationError(
+                detail=_("شما قبلا دیدگاه خود را ثبت کرده‌اید")
+            )
 
 
 class CommentDetailSerializer(CommentSerializer):
@@ -90,3 +92,28 @@ class CommentDetailSerializer(CommentSerializer):
         representation.move_to_end("update_datetime")
 
         return representation
+
+
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = "__all__"
+
+        extra_kwargs = {
+            "user": {
+                "read_only": True,
+            },
+            "comment": {
+                "read_only": True,
+            },
+        }
+
+    def create(self, validated_data):
+        try:
+            validated_data["user"] = self.context.get("user")
+            validated_data["comment"] = self.context.get("comment")
+            return super().create(validated_data)
+        except IntegrityError:
+            raise serializers.ValidationError(
+                detail=_("شما قبلا این دیدگاه را لایک کرده‌اید")
+            )

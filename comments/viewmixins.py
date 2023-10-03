@@ -1,6 +1,10 @@
+from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
+
 from core.utils import get_cached_object, get_cached_queryset
 
-from .models import Comment
+from .models import Comment, Like
+from .serializers import LikeSerializer
 
 
 class CommentAPIViewMixin:
@@ -22,3 +26,19 @@ class CommentAPIViewMixin:
 
         cached_queryset = get_cached_queryset(queryset=queryset, cache_key=cache_key)
         return cached_queryset
+
+
+class LikeAPIViewMixin:
+    queryset = Like.objects.all()
+    serializer_class = LikeSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self):
+        comment = get_object_or_404(klass=Comment, pk=self.kwargs.get("comment_id"))
+        return comment
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["user"] = self.request.user
+        context["comment"] = self.get_object()
+        return context

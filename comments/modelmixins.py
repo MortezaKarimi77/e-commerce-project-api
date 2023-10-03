@@ -1,5 +1,11 @@
 from django.db.models import F
-from django_lifecycle import AFTER_CREATE, BEFORE_CREATE, BEFORE_DELETE, hook
+from django_lifecycle import (
+    AFTER_CREATE,
+    AFTER_DELETE,
+    BEFORE_CREATE,
+    BEFORE_DELETE,
+    hook,
+)
 
 
 class CommentModelMixin:
@@ -20,3 +26,15 @@ class CommentModelMixin:
     def decrease_comments_count(self):
         self.product.comments_count = F("comments_count") - 1
         self.product.save()
+
+
+class LikeModelMixin:
+    @hook(AFTER_CREATE)
+    def increase_comment_likes(self):
+        self.comment.likes_count = F("likes_count") + 1
+        self.comment.save()
+
+    @hook(AFTER_DELETE)
+    def decrease_comment_likes(self):
+        self.comment.likes_count = F("likes_count") - 1
+        self.comment.save()
