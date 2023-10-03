@@ -52,4 +52,8 @@ urlpatterns = [
         route="api/v1/",
         view=include("users.urls"),
     ),
+    path(
+        route="api/v1/",
+        view=include("comments.urls"),
+    ),
 ] + static(prefix=settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
