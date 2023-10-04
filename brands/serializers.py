@@ -1,19 +1,26 @@
-from django.urls import reverse
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 
 from .models import Brand
 
 
 class BrandSerializer(serializers.ModelSerializer):
-    def get_products_url(self, brand) -> str:
+    def get_absolute_url(self, brand) -> str:
         return reverse(
-            viewname="brands:brand_products",
+            viewname="brands:brand_detail_update_delete",
+            request=self.context.get("request"),
             kwargs={"brand_url": brand.url},
         )
 
-    absolute_url = serializers.CharField(
-        source="get_absolute_url",
-        read_only=True,
+    def get_products_url(self, brand) -> str:
+        return reverse(
+            viewname="brands:brand_products",
+            request=self.context.get("request"),
+            kwargs={"brand_url": brand.url},
+        )
+
+    absolute_url = serializers.SerializerMethodField(
+        method_name="get_absolute_url",
     )
     products_url = serializers.SerializerMethodField(
         method_name="get_products_url",

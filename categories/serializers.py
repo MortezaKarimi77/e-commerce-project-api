@@ -1,6 +1,6 @@
-from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 from rest_framework.serializers import ValidationError
 
 from .models import Category
@@ -35,15 +35,22 @@ class CategorySerializer(serializers.ModelSerializer):
 
         return super().validate(data)
 
-    def get_products_url(self, category):
+    def get_absolute_url(self, category) -> str:
         return reverse(
-            viewname="categories:category_products",
+            viewname="categories:category_detail_update_delete",
+            request=self.context.get("request"),
             kwargs={"category_id": category.id},
         )
 
-    absolute_url = serializers.CharField(
-        source="get_absolute_url",
-        read_only=True,
+    def get_products_url(self, category):
+        return reverse(
+            viewname="categories:category_products",
+            request=self.context.get("request"),
+            kwargs={"category_id": category.id},
+        )
+
+    absolute_url = serializers.SerializerMethodField(
+        method_name="get_absolute_url",
     )
     products_url = serializers.SerializerMethodField(
         method_name="get_products_url",
