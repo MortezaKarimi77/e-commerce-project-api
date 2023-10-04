@@ -19,6 +19,10 @@ class TokenObtainPairSerializer(SimpleJwtTokenObtainPairSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    absolute_url = serializers.SerializerMethodField(
+        method_name="get_absolute_url",
+    )
+
     def update(self, instance, validated_data):
         password = validated_data.get("password")
         if password:
@@ -31,10 +35,6 @@ class UserSerializer(serializers.ModelSerializer):
             request=self.context.get("request"),
             kwargs={"username": user.username},
         )
-
-    absolute_url = serializers.SerializerMethodField(
-        method_name="get_absolute_url",
-    )
 
 
 class UserListSerializer(UserSerializer):

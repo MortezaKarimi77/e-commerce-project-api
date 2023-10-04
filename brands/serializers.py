@@ -5,6 +5,13 @@ from .models import Brand
 
 
 class BrandSerializer(serializers.ModelSerializer):
+    absolute_url = serializers.SerializerMethodField(
+        method_name="get_absolute_url",
+    )
+    products_url = serializers.SerializerMethodField(
+        method_name="get_products_url",
+    )
+
     def get_absolute_url(self, brand) -> str:
         return reverse(
             viewname="brands:brand_detail_update_delete",
@@ -18,13 +25,6 @@ class BrandSerializer(serializers.ModelSerializer):
             request=self.context.get("request"),
             kwargs={"brand_url": brand.url},
         )
-
-    absolute_url = serializers.SerializerMethodField(
-        method_name="get_absolute_url",
-    )
-    products_url = serializers.SerializerMethodField(
-        method_name="get_products_url",
-    )
 
 
 class BrandListSerializer(BrandSerializer):

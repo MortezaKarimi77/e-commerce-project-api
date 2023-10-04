@@ -7,6 +7,27 @@ from .models import Category
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    absolute_url = serializers.SerializerMethodField(
+        method_name="get_absolute_url",
+    )
+    products_url = serializers.SerializerMethodField(
+        method_name="get_products_url",
+    )
+
+    def get_absolute_url(self, category) -> str:
+        return reverse(
+            viewname="categories:category_detail_update_delete",
+            request=self.context.get("request"),
+            kwargs={"category_id": category.id},
+        )
+
+    def get_products_url(self, category) -> str:
+        return reverse(
+            viewname="categories:category_products",
+            request=self.context.get("request"),
+            kwargs={"category_id": category.id},
+        )
+
     def validate(self, data):
         category = self.instance
         category_id = category.id if category else None
@@ -34,27 +55,6 @@ class CategorySerializer(serializers.ModelSerializer):
             raise ValidationError(_("یک دسته‌بندی نمی‌تواند زیردسته خودش باشد"))
 
         return super().validate(data)
-
-    def get_absolute_url(self, category) -> str:
-        return reverse(
-            viewname="categories:category_detail_update_delete",
-            request=self.context.get("request"),
-            kwargs={"category_id": category.id},
-        )
-
-    def get_products_url(self, category):
-        return reverse(
-            viewname="categories:category_products",
-            request=self.context.get("request"),
-            kwargs={"category_id": category.id},
-        )
-
-    absolute_url = serializers.SerializerMethodField(
-        method_name="get_absolute_url",
-    )
-    products_url = serializers.SerializerMethodField(
-        method_name="get_products_url",
-    )
 
 
 class ParentCategorySerializer(CategorySerializer):
