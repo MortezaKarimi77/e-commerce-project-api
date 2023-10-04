@@ -230,7 +230,7 @@ class ProductItem(LifecycleModelMixin, ProductItemModelMixin, models.Model):
 
     def get_absolute_url(self):
         return reverse(
-            "products:product_item_detail_update_delete",
+            viewname="products:product_item_detail_update_delete",
             kwargs={"product_item_id": self.id},
         )
 
@@ -274,7 +274,7 @@ class ProductMedia(LifecycleModelMixin, models.Model):
 
     def get_absolute_url(self):
         return reverse(
-            "products:product_media_detail_update_delete",
+            viewname="products:product_media_detail_update_delete",
             kwargs={"product_media_id": self.id},
         )
 
@@ -302,7 +302,7 @@ class Attribute(models.Model):
 
     def get_absolute_url(self):
         return reverse(
-            "products:attribute_detail_update_delete",
+            viewname="products:attribute_detail_update_delete",
             kwargs={"attribute_id": self.id},
         )
 
@@ -367,6 +367,6 @@ class AttributeValue(models.Model):
 
     def get_absolute_url(self):
         return reverse(
-            "products:attribute_value_detail_update_delete",
+            viewname="products:attribute_value_detail_update_delete",
             kwargs={"attribute_value_id": self.id},
         )

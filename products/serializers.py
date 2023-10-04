@@ -1,5 +1,5 @@
-from django.urls import reverse
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 
 from .models import Attribute, AttributeValue, Product, ProductItem, ProductMedia
 
@@ -21,17 +21,29 @@ class AttributeSerializer(serializers.ModelSerializer):
         representation.move_to_end("category_url")
         return representation
 
+    def get_absolute_url(self, attribute) -> str:
+        return reverse(
+            viewname="products:attribute_detail_update_delete",
+            request=self.context.get("request"),
+            kwargs={"attribute_id": attribute.id},
+        )
+
+    def get_category_url(self, attribute) -> str:
+        return reverse(
+            viewname="categories:category_detail_update_delete",
+            request=self.context.get("request"),
+            kwargs={"category_id": attribute.category.id},
+        )
+
     category_full_name = serializers.CharField(
         source="category.full_name",
         read_only=True,
     )
-    category_url = serializers.CharField(
-        source="category.get_absolute_url",
-        read_only=True,
+    category_url = serializers.SerializerMethodField(
+        method_name="get_category_url",
     )
-    absolute_url = serializers.CharField(
-        source="get_absolute_url",
-        read_only=True,
+    absolute_url = serializers.SerializerMethodField(
+        method_name="get_absolute_url",
     )
 
 
@@ -52,21 +64,33 @@ class AttributeValueSerializer(serializers.ModelSerializer):
         representation.move_to_end("attribute_url")
         return representation
 
+    def get_attribute_url(self, attribute_value) -> str:
+        return reverse(
+            viewname="products:attribute_detail_update_delete",
+            request=self.context.get("request"),
+            kwargs={"attribute_id": attribute_value.attribute.id},
+        )
+
+    def get_absolute_url(self, attribute_value) -> str:
+        return reverse(
+            viewname="products:attribute_value_detail_update_delete",
+            request=self.context.get("request"),
+            kwargs={"attribute_value_id": attribute_value.id},
+        )
+
     attribute_name = serializers.CharField(
         source="attribute.name",
-        read_only=True,
-    )
-    attribute_url = serializers.CharField(
-        source="attribute.get_absolute_url",
         read_only=True,
     )
     attribute_category = serializers.CharField(
         source="attribute.category.full_name",
         read_only=True,
     )
-    absolute_url = serializers.CharField(
-        source="get_absolute_url",
-        read_only=True,
+    attribute_url = serializers.SerializerMethodField(
+        method_name="get_attribute_url",
+    )
+    absolute_url = serializers.SerializerMethodField(
+        method_name="get_absolute_url",
     )
 
 
@@ -90,17 +114,32 @@ class ConfigurationSerializer(serializers.ModelSerializer):
 
 
 class ProductItemSerializer(serializers.ModelSerializer):
+    def get_absolute_url(self, product_item) -> str:
+        return reverse(
+            viewname="products:product_item_detail_update_delete",
+            request=self.context.get("request"),
+            kwargs={"product_item_id": product_item.id},
+        )
+
+    def get_product_url(self, product_item) -> str:
+        return reverse(
+            viewname="products:product_detail_update_delete",
+            request=self.context.get("request"),
+            kwargs={
+                "category_id": product_item.product.category.id,
+                "product_url": product_item.product.url,
+            },
+        )
+
     product_name = serializers.CharField(
         source="product.name",
         read_only=True,
     )
-    product_url = serializers.CharField(
-        source="product.get_absolute_url",
-        read_only=True,
+    product_url = serializers.SerializerMethodField(
+        method_name="get_product_url",
     )
-    absolute_url = serializers.CharField(
-        source="get_absolute_url",
-        read_only=True,
+    absolute_url = serializers.SerializerMethodField(
+        method_name="get_absolute_url",
     )
 
 
@@ -205,6 +244,13 @@ class ProductMediaSerializer(serializers.ModelSerializer):
 
         return representation
 
+    def get_absolute_url(self, product_media) -> str:
+        return reverse(
+            viewname="products:product_media_detail_update_delete",
+            request=self.context.get("request"),
+            kwargs={"product_media_id": product_media.id},
+        )
+
     type_name = serializers.CharField(
         source="get_type_display",
         read_only=True,
@@ -213,16 +259,21 @@ class ProductMediaSerializer(serializers.ModelSerializer):
         source="product.name",
         read_only=True,
     )
-    absolute_url = serializers.CharField(
-        source="get_absolute_url",
-        read_only=True,
+    absolute_url = serializers.SerializerMethodField(
+        method_name="get_absolute_url",
     )
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    absolute_url = serializers.CharField(
-        source="get_absolute_url",
-        read_only=True,
+    def get_absolute_url(self, product):
+        return reverse(
+            viewname="products:product_detail_update_delete",
+            request=self.context.get("request"),
+            kwargs={"category_id": product.category.id, "product_url": product.url},
+        )
+
+    absolute_url = serializers.SerializerMethodField(
+        method_name="get_absolute_url",
     )
 
 
@@ -350,11 +401,17 @@ class ProductDetailSerializer(ProductSerializer):
         if brand:
             products_list_url = reverse(
                 viewname="brands:brand_products",
+                request=self.context.get("request"),
+                kwargs={"brand_url": brand.url},
+            )
+            absolute_url = reverse(
+                viewname="brands:brand_detail_update_delete",
+                request=self.context.get("request"),
                 kwargs={"brand_url": brand.url},
             )
             return {
                 "name": brand.name,
-                "absolute_url": brand.get_absolute_url(),
+                "absolute_url": absolute_url,
                 "products_url": products_list_url,
             }
         else:
@@ -364,11 +421,17 @@ class ProductDetailSerializer(ProductSerializer):
         category = product.category
         products_list_url = reverse(
             viewname="categories:category_products",
+            request=self.context.get("request"),
+            kwargs={"category_id": category.id},
+        )
+        absolute_url = reverse(
+            viewname="categories:category_detail_update_delete",
+            request=self.context.get("request"),
             kwargs={"category_id": category.id},
         )
         return {
             "full_name": category.full_name,
-            "absolute_url": category.get_absolute_url(),
+            "absolute_url": absolute_url,
             "products_url": products_list_url,
         }
 
