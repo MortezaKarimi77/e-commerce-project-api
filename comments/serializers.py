@@ -1,28 +1,44 @@
 from django.db import IntegrityError
-from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 
 from .models import Comment, Like
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    def get_absolute_url(self, comment) -> str:
+        return reverse(
+            viewname="comments:comment_detail_update_delete",
+            request=self.context.get("request"),
+            kwargs={"comment_id": comment.id},
+        )
+
+    def get_product_url(self, comment) -> str:
+        return reverse(
+            viewname="products:product_detail_update_delete",
+            request=self.context.get("request"),
+            kwargs={
+                "category_id": comment.product.category.id,
+                "product_url": comment.product.url,
+            },
+        )
+
     def get_user_url(self, comment) -> str:
         return reverse(
             viewname="users:user_detail_update_delete",
+            request=self.context.get("request"),
             kwargs={"username": comment.user.username},
         )
 
-    absolute_url = serializers.CharField(
-        source="get_absolute_url",
-        read_only=True,
+    absolute_url = serializers.SerializerMethodField(
+        method_name="get_absolute_url",
     )
     user_url = serializers.SerializerMethodField(
         method_name="get_user_url",
     )
-    product_url = serializers.CharField(
-        source="product.get_absolute_url",
-        read_only=True,
+    product_url = serializers.SerializerMethodField(
+        source="get_product_url",
     )
     full_name = serializers.CharField(
         source="user.get_full_name",
