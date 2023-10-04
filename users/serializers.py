@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
-from django.urls import reverse
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer as SimpleJwtTokenObtainPairSerializer,
 )
@@ -10,7 +10,6 @@ User = get_user_model()
 
 
 class TokenObtainPairSerializer(SimpleJwtTokenObtainPairSerializer):
-    # methods
     def validate(self, data):
         data = super().validate(data)
         data["username"] = self.user.username
@@ -20,7 +19,6 @@ class TokenObtainPairSerializer(SimpleJwtTokenObtainPairSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    # methods
     def update(self, instance, validated_data):
         password = validated_data.get("password")
         if password:
@@ -30,10 +28,10 @@ class UserSerializer(serializers.ModelSerializer):
     def get_absolute_url(self, user) -> str:
         return reverse(
             viewname="users:user_detail_update_delete",
+            request=self.context.get("request"),
             kwargs={"username": user.username},
         )
 
-    # fields
     absolute_url = serializers.SerializerMethodField(
         method_name="get_absolute_url",
     )
@@ -74,7 +72,6 @@ class UserListSerializer(UserSerializer):
             },
         }
 
-    # methods
     def create(self, validated_data):
         user = self.Meta.model.objects.create_user(**validated_data)
         return user
@@ -90,7 +87,6 @@ class PrivateUserDetailSerializer(UserSerializer):
             },
         }
 
-    # methods
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation.move_to_end("absolute_url")
