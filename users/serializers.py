@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
-from rest_framework.reverse import reverse
 from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer as SimpleJwtTokenObtainPairSerializer,
 )
@@ -19,8 +18,10 @@ class TokenObtainPairSerializer(SimpleJwtTokenObtainPairSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    absolute_url = serializers.SerializerMethodField(
-        method_name="get_absolute_url",
+    absolute_url = serializers.HyperlinkedIdentityField(
+        view_name="users:user_detail_update_delete",
+        lookup_url_kwarg="username",
+        lookup_field="username",
     )
 
     def update(self, instance, validated_data):
@@ -28,13 +29,6 @@ class UserSerializer(serializers.ModelSerializer):
         if password:
             validated_data["password"] = make_password(password=password)
         return super().update(instance, validated_data)
-
-    def get_absolute_url(self, user) -> str:
-        return reverse(
-            viewname="users:user_detail_update_delete",
-            request=self.context.get("request"),
-            kwargs={"username": user.username},
-        )
 
 
 class UserListSerializer(UserSerializer):

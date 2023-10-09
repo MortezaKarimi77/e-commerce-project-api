@@ -11,22 +11,17 @@ class CommentSerializer(serializers.ModelSerializer):
         source="user.get_full_name",
         read_only=True,
     )
-    absolute_url = serializers.SerializerMethodField(
-        method_name="get_absolute_url",
+    absolute_url = serializers.HyperlinkedIdentityField(
+        view_name="comments:comment_detail_update_delete",
+        lookup_url_kwarg="comment_id",
+        lookup_field="id",
     )
     user_url = serializers.SerializerMethodField(
         method_name="get_user_url",
     )
     product_url = serializers.SerializerMethodField(
-        source="get_product_url",
+        method_name="get_product_url",
     )
-
-    def get_absolute_url(self, comment) -> str:
-        return reverse(
-            viewname="comments:comment_detail_update_delete",
-            request=self.context.get("request"),
-            kwargs={"comment_id": comment.id},
-        )
 
     def get_user_url(self, comment) -> str:
         return reverse(

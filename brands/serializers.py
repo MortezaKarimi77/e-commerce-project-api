@@ -1,30 +1,19 @@
 from rest_framework import serializers
-from rest_framework.reverse import reverse
 
 from .models import Brand
 
 
 class BrandSerializer(serializers.ModelSerializer):
-    absolute_url = serializers.SerializerMethodField(
-        method_name="get_absolute_url",
+    absolute_url = serializers.HyperlinkedIdentityField(
+        view_name="brands:brand_detail_update_delete",
+        lookup_url_kwarg="brand_url",
+        lookup_field="url",
     )
-    products_url = serializers.SerializerMethodField(
-        method_name="get_products_url",
+    products_url = serializers.HyperlinkedIdentityField(
+        view_name="brands:brand_products",
+        lookup_url_kwarg="brand_url",
+        lookup_field="url",
     )
-
-    def get_absolute_url(self, brand) -> str:
-        return reverse(
-            viewname="brands:brand_detail_update_delete",
-            request=self.context.get("request"),
-            kwargs={"brand_url": brand.url},
-        )
-
-    def get_products_url(self, brand) -> str:
-        return reverse(
-            viewname="brands:brand_products",
-            request=self.context.get("request"),
-            kwargs={"brand_url": brand.url},
-        )
 
 
 class BrandListSerializer(BrandSerializer):

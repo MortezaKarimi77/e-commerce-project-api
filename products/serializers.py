@@ -12,8 +12,10 @@ class AttributeSerializer(serializers.ModelSerializer):
     category_url = serializers.SerializerMethodField(
         method_name="get_category_url",
     )
-    absolute_url = serializers.SerializerMethodField(
-        method_name="get_absolute_url",
+    absolute_url = serializers.HyperlinkedIdentityField(
+        view_name="products:attribute_detail_update_delete",
+        lookup_url_kwarg="attribute_id",
+        lookup_field="id",
     )
 
     class Meta:
@@ -31,13 +33,6 @@ class AttributeSerializer(serializers.ModelSerializer):
             viewname="categories:category_detail_update_delete",
             request=self.context.get("request"),
             kwargs={"category_id": attribute.category.id},
-        )
-
-    def get_absolute_url(self, attribute) -> str:
-        return reverse(
-            viewname="products:attribute_detail_update_delete",
-            request=self.context.get("request"),
-            kwargs={"attribute_id": attribute.id},
         )
 
     def to_representation(self, instance):
@@ -59,8 +54,10 @@ class AttributeValueSerializer(serializers.ModelSerializer):
     attribute_url = serializers.SerializerMethodField(
         method_name="get_attribute_url",
     )
-    absolute_url = serializers.SerializerMethodField(
-        method_name="get_absolute_url",
+    absolute_url = serializers.HyperlinkedIdentityField(
+        view_name="products:attribute_value_detail_update_delete",
+        lookup_url_kwarg="attribute_value_id",
+        lookup_field="id",
     )
 
     class Meta:
@@ -84,13 +81,6 @@ class AttributeValueSerializer(serializers.ModelSerializer):
             viewname="products:attribute_detail_update_delete",
             request=self.context.get("request"),
             kwargs={"attribute_id": attribute_value.attribute.id},
-        )
-
-    def get_absolute_url(self, attribute_value) -> str:
-        return reverse(
-            viewname="products:attribute_value_detail_update_delete",
-            request=self.context.get("request"),
-            kwargs={"attribute_value_id": attribute_value.id},
         )
 
 
@@ -121,16 +111,11 @@ class ProductItemSerializer(serializers.ModelSerializer):
     product_url = serializers.SerializerMethodField(
         method_name="get_product_url",
     )
-    absolute_url = serializers.SerializerMethodField(
-        method_name="get_absolute_url",
+    absolute_url = serializers.HyperlinkedIdentityField(
+        view_name="products:product_item_detail_update_delete",
+        lookup_url_kwarg="product_item_id",
+        lookup_field="id",
     )
-
-    def get_absolute_url(self, product_item) -> str:
-        return reverse(
-            viewname="products:product_item_detail_update_delete",
-            request=self.context.get("request"),
-            kwargs={"product_item_id": product_item.id},
-        )
 
     def get_product_url(self, product_item) -> str:
         return reverse(
@@ -228,8 +213,10 @@ class ProductMediaSerializer(serializers.ModelSerializer):
         source="product.name",
         read_only=True,
     )
-    absolute_url = serializers.SerializerMethodField(
-        method_name="get_absolute_url",
+    absolute_url = serializers.HyperlinkedIdentityField(
+        view_name="products:product_media_detail_update_delete",
+        lookup_url_kwarg="product_media_id",
+        lookup_field="id",
     )
 
     class Meta:
@@ -244,13 +231,6 @@ class ProductMediaSerializer(serializers.ModelSerializer):
                 "write_only": True,
             },
         }
-
-    def get_absolute_url(self, product_media) -> str:
-        return reverse(
-            viewname="products:product_media_detail_update_delete",
-            request=self.context.get("request"),
-            kwargs={"product_media_id": product_media.id},
-        )
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

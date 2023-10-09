@@ -1,32 +1,21 @@
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
-from rest_framework.reverse import reverse
 from rest_framework.serializers import ValidationError
 
 from .models import Category
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    absolute_url = serializers.SerializerMethodField(
-        method_name="get_absolute_url",
+    absolute_url = serializers.HyperlinkedIdentityField(
+        view_name="categories:category_detail_update_delete",
+        lookup_url_kwarg="category_id",
+        lookup_field="id",
     )
-    products_url = serializers.SerializerMethodField(
-        method_name="get_products_url",
+    products_url = serializers.HyperlinkedIdentityField(
+        view_name="categories:category_products",
+        lookup_url_kwarg="category_id",
+        lookup_field="id",
     )
-
-    def get_absolute_url(self, category) -> str:
-        return reverse(
-            viewname="categories:category_detail_update_delete",
-            request=self.context.get("request"),
-            kwargs={"category_id": category.id},
-        )
-
-    def get_products_url(self, category) -> str:
-        return reverse(
-            viewname="categories:category_products",
-            request=self.context.get("request"),
-            kwargs={"category_id": category.id},
-        )
 
     def validate(self, data):
         category = self.instance
@@ -71,6 +60,11 @@ class ParentCategorySerializer(CategorySerializer):
 
 
 class CategoryListSerializer(CategorySerializer):
+    parent_category_info = ParentCategorySerializer(
+        source="parent_category",
+        read_only=True,
+    )
+
     class Meta:
         model = Category
         fields = (
@@ -101,11 +95,6 @@ class CategoryListSerializer(CategorySerializer):
                 "write_only": True,
             },
         }
-
-    parent_category_info = ParentCategorySerializer(
-        source="parent_category",
-        read_only=True,
-    )
 
 
 class CategoryDetailSerializer(CategoryListSerializer):
