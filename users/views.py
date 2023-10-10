@@ -27,20 +27,24 @@ class UserListCreate(UserAPIViewMixin, ListCreateAPIView):
 
 
 class UserDetailUpdateDelete(UserAPIViewMixin, RetrieveUpdateDestroyAPIView):
-    private_serializer_class = PrivateUserDetailSerializer
-    public_serializer_class = PublicUserDetailSerializer
-    private_permission_classes = (IsAdminUser,)
-    public_permission_classes = (IsAuthenticated, IsUserOwner)
+    serializer_classes = {
+        "private": PrivateUserDetailSerializer,
+        "public": PublicUserDetailSerializer,
+    }
+    permission_classes = {
+        "private": (IsAdminUser,),
+        "public": (IsAuthenticated, IsUserOwner),
+    }
     http_method_names = ("get", "patch", "delete")
 
     def get_serializer_class(self, *args, **kwargs):
         if self.request.user.is_staff:
-            return self.private_serializer_class
+            return self.serializer_classes["private"]
         else:
-            return self.public_serializer_class
+            return self.serializer_classes["public"]
 
     def get_permissions(self):
         if self.request.user.is_staff:
-            return [permission() for permission in self.private_permission_classes]
+            return [permission() for permission in self.permission_classes["private"]]
         else:
-            return [permission() for permission in self.public_permission_classes]
+            return [permission() for permission in self.permission_classes["public"]]
