@@ -70,15 +70,10 @@ class CommentListSerializer(CommentSerializer):
         }
 
     def create(self, validated_data):
-        try:
-            if not validated_data["user"]:
-                user = self.context["request"].user
-                validated_data["user"] = user
-            return super().create(validated_data)
-        except IntegrityError:
-            raise serializers.ValidationError(
-                detail=_("شما قبلا دیدگاه خود را ثبت کرده‌اید")
-            )
+        user = self.context["request"].user
+        return self.Meta.model.objects.create_comment(
+            user=user, validated_data=validated_data
+        )
 
 
 class CommentDetailSerializer(CommentSerializer):

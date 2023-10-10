@@ -7,6 +7,7 @@ from django_lifecycle import LifecycleModelMixin
 
 from core.models import TimeStamp
 
+from .managers import CommentManager
 from .modelmixins import CommentModelMixin, LikeModelMixin
 
 User = get_user_model()
@@ -44,6 +45,8 @@ class Comment(LifecycleModelMixin, CommentModelMixin, TimeStamp):
         default=True,
     )
 
+    objects = CommentManager()
+
     class Meta:
         ordering = ("-create_datetime",)
         unique_together = ("user", "product")
@@ -57,6 +60,12 @@ class Comment(LifecycleModelMixin, CommentModelMixin, TimeStamp):
             viewname="comments:comment_detail_update_delete",
             kwargs={"comment_id": self.id},
         )
+
+    def unique_error_message(self, model_class, unique_check):
+        if unique_check == ("user", "product"):
+            raise ValidationError(message=_("شما قبلا دیدگاه خود را ثبت کرده‌اید"))
+        else:
+            return super().unique_error_message(model_class, unique_check)
 
 
 class Like(LifecycleModelMixin, LikeModelMixin, models.Model):
