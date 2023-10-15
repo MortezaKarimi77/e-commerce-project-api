@@ -7,7 +7,7 @@ from django_lifecycle import LifecycleModelMixin
 
 from core.models import TimeStamp
 
-from .managers import CommentManager
+from .managers import CommentManager, LikeManager
 from .modelmixins import CommentModelMixin, LikeModelMixin
 
 User = get_user_model()
@@ -84,6 +84,8 @@ class Like(LifecycleModelMixin, LikeModelMixin, models.Model):
         verbose_name=_("تاریخ و زمان ایجاد"),
         auto_now_add=True,
     )
+
+    objects = LikeManager()
 
     class Meta:
         ordering = ("-create_datetime",)

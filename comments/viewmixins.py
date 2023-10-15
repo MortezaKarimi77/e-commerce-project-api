@@ -1,5 +1,4 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
 
 from core.utils import get_cached_object, get_cached_queryset
 
@@ -31,7 +30,6 @@ class CommentAPIViewMixin:
 class LikeAPIViewMixin:
     queryset = Like.objects.all()
     serializer_class = LikeSerializer
-    permission_classes = (IsAuthenticated,)
 
     def get_object(self):
         comment = get_object_or_404(klass=Comment, pk=self.kwargs.get("comment_id"))

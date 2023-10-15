@@ -1,5 +1,3 @@
-from django.db import IntegrityError
-from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
@@ -115,11 +113,6 @@ class LikeSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        try:
-            validated_data["user"] = self.context.get("user")
-            validated_data["comment"] = self.context.get("comment")
-            return super().create(validated_data)
-        except IntegrityError:
-            raise serializers.ValidationError(
-                detail=_("شما قبلا این دیدگاه را لایک کرده‌اید")
-            )
+        validated_data["user"] = self.context.get("user")
+        validated_data["comment"] = self.context.get("comment")
+        return self.Meta.model.objects.create_like(validated_data)

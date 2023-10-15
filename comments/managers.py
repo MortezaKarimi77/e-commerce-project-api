@@ -12,3 +12,12 @@ class CommentManager(models.Manager):
             return comment
         except IntegrityError:
             raise ValidationError(detail=_("شما قبلا دیدگاه خود را ثبت کرده‌اید"))
+
+
+class LikeManager(models.Manager):
+    def create_like(self, validated_data):
+        try:
+            like = self.create(**validated_data)
+            return like
+        except IntegrityError:
+            raise ValidationError(detail=_("شما قبلا این دیدگاه را لایک کرده‌اید"))

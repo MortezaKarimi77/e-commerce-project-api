@@ -5,6 +5,7 @@ from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
 )
+from rest_framework.permissions import IsAuthenticated
 
 from core.permissions import IsAdminOrOwner, IsAdminOrWriteOnly
 
@@ -26,7 +27,7 @@ class CommentDetailUpdateDelete(CommentAPIViewMixin, RetrieveUpdateDestroyAPIVie
 
 
 class LikeCreate(LikeAPIViewMixin, CreateAPIView):
-    pass
+    permission_classes = (IsAuthenticated,)
 
 
 class LikeDelete(LikeAPIViewMixin, DestroyAPIView):
