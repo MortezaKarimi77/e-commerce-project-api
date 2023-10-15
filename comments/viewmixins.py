@@ -10,8 +10,8 @@ class CommentAPIViewMixin:
     queryset = Comment.objects.all()
 
     def get_object(self):
-        comment_url = self.kwargs["comment_id"]
-        cache_key = f"comment_{comment_url}"
+        comment_id = self.kwargs["comment_id"]
+        cache_key = f"comment_{comment_id}"
 
         cached_object = get_cached_object(
             get_object_function=super().get_object, cache_key=cache_key
