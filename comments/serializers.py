@@ -21,6 +21,9 @@ class CommentSerializer(serializers.ModelSerializer):
     product_url = serializers.SerializerMethodField(
         method_name="get_product_url",
     )
+    liked_by_user = serializers.SerializerMethodField(
+        method_name="get_liked_by_user",
+    )
 
     def get_user_url(self, comment) -> str:
         return reverse(
@@ -39,6 +42,13 @@ class CommentSerializer(serializers.ModelSerializer):
             },
         )
 
+    def get_liked_by_user(self, comment):
+        user = self.context["request"].user
+        if user.is_authenticated:
+            return comment.likes.filter(user=user).exists()
+        else:
+            return False
+
 
 class CommentListSerializer(CommentSerializer):
     class Meta:
@@ -54,6 +64,7 @@ class CommentListSerializer(CommentSerializer):
             "product_url",
             "published",
             "is_buyer",
+            "liked_by_user",
             "likes_count",
             "create_datetime",
             "update_datetime",

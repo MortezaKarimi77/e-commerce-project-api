@@ -71,11 +71,13 @@ class Like(LifecycleModelMixin, LikeModelMixin, models.Model):
         related_name="likes",
         to=Comment,
         on_delete=models.CASCADE,
+        db_index=True,
     )
     user = models.ForeignKey(
         verbose_name=_("کاربر"),
         to=User,
         on_delete=models.CASCADE,
+        db_index=True,
     )
     create_datetime = models.DateTimeField(
         verbose_name=_("تاریخ و زمان ایجاد"),
