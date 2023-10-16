@@ -166,6 +166,9 @@ SIMPLE_JWT = {
 }
 
 SPECTACULAR_SETTINGS = {
+    "TITLE": "ProShop API",
+    "DESCRIPTION": "An API For Online Shop & E-commerce Website",
+    "VERSION": "1.0.0",
     "SWAGGER_UI_SETTINGS": {
         "deepLinking": True,
         "persistAuthorization": True,
