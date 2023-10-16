@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
@@ -58,20 +59,24 @@ class CommentListSerializer(CommentSerializer):
             "update_datetime",
         )
 
+        validators = (
+            serializers.UniqueTogetherValidator(
+                queryset=Comment.objects.all(),
+                fields=("user", "product"),
+                message=_("شما قبلا دیدگاه خود را ثبت کرده‌اید"),
+            ),
+        )
+
         extra_kwargs = {
             "user": {
                 "write_only": True,
+                "required": False,
+                "default": serializers.CurrentUserDefault(),
             },
             "product": {
                 "write_only": True,
             },
         }
-
-    def create(self, validated_data):
-        user = self.context["request"].user
-        return self.Meta.model.objects.create_comment(
-            user=user, validated_data=validated_data
-        )
 
 
 class CommentDetailSerializer(CommentSerializer):
