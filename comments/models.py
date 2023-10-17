@@ -49,7 +49,7 @@ class Comment(LifecycleModelMixin, CommentModelMixin, TimeStamp):
         unique_together = ("user", "product")
         db_table = "comment"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user.get_full_name()} - {self.product.name} - {self.text:20} ..."
 
     def get_absolute_url(self) -> str:
@@ -91,7 +91,7 @@ class Like(LifecycleModelMixin, LikeModelMixin, models.Model):
         unique_together = ("user", "comment")
         db_table = "like"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user.username} liked {self.comment.text:20} ..."
 
     def unique_error_message(self, model_class, unique_check):

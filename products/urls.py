@@ -10,7 +10,7 @@ urlpatterns = [
         name="product_list_create",
     ),
     path(
-        route="products/<category_id>/<product_url>/",
+        route="products/<int:category_id>/<slug:product_url>/",
         view=views.ProductDetailUpdateDelete.as_view(),
         name="product_detail_update_delete",
     ),
@@ -20,7 +20,7 @@ urlpatterns = [
         name="product_item_list_create",
     ),
     path(
-        route="product-items/<product_item_id>/",
+        route="product-items/<int:product_item_id>/",
         view=views.ProductItemDetailUpdateDelete.as_view(),
         name="product_item_detail_update_delete",
     ),
@@ -30,7 +30,7 @@ urlpatterns = [
         name="product_media_list_create",
     ),
     path(
-        route="product-medias/<product_media_id>/",
+        route="product-medias/<int:product_media_id>/",
         view=views.ProductMediaDetailUpdateDelete.as_view(),
         name="product_media_detail_update_delete",
     ),
@@ -40,7 +40,7 @@ urlpatterns = [
         name="attribute_list_create",
     ),
     path(
-        route="attributes/<attribute_id>/",
+        route="attributes/<int:attribute_id>/",
         view=views.AttributeDetailUpdateDelete.as_view(),
         name="attribute_detail_update_delete",
     ),
@@ -50,7 +50,7 @@ urlpatterns = [
         name="attribute_value_list_create",
     ),
     path(
-        route="attribute-values/<attribute_value_id>/",
+        route="attribute-values/<int:attribute_value_id>/",
         view=views.AttributeValueDetailUpdateDelete.as_view(),
         name="attribute_value_detail_update_delete",
     ),

@@ -26,7 +26,7 @@ urlpatterns = [
         name="user_list_create",
     ),
     path(
-        route="users/<username>/",
+        route="users/<str:username>/",
         view=views.UserDetailUpdateDelete.as_view(),
         name="user_detail_update_delete",
     ),

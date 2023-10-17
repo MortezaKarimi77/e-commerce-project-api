@@ -23,7 +23,7 @@ class PaymentMethod(models.Model):
         ordering = ("name",)
         db_table = "payment_method"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -48,7 +48,7 @@ class ShippingMethod(models.Model):
         ordering = ("name",)
         db_table = "shipping_method"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -77,7 +77,7 @@ class OrderStatus(models.Model):
         verbose_name_plural = "Order Statuses"
         db_table = "order_status"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.get_status_display()
 
 
@@ -92,7 +92,7 @@ class Region(models.Model):
         ordering = ("name",)
         db_table = "region"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -116,7 +116,7 @@ class City(models.Model):
         verbose_name_plural = "Cities"
         db_table = "city"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.region}, {self.name}"
 
 
@@ -270,7 +270,7 @@ class Order(LifecycleModelMixin, OrderModelMixin, models.Model):
         ordering = ("-create_datetime",)
         db_table = "order"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user} | {self.payment_datetime}"
 
 
@@ -319,5 +319,5 @@ class OrderItem(LifecycleModelMixin, OrderItemModelMixin, models.Model):
         unique_together = ("order", "product_item")
         db_table = "order_item"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name} | {self.order}"

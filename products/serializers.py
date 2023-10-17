@@ -70,18 +70,18 @@ class AttributeValueSerializer(serializers.ModelSerializer):
             },
         }
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation.move_to_end("absolute_url")
-        representation.move_to_end("attribute_url")
-        return representation
-
     def get_attribute_url(self, attribute_value) -> str:
         return reverse(
             viewname="products:attribute_detail_update_delete",
             request=self.context.get("request"),
             kwargs={"attribute_id": attribute_value.attribute.id},
         )
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation.move_to_end("absolute_url")
+        representation.move_to_end("attribute_url")
+        return representation
 
 
 class ConfigurationSerializer(serializers.ModelSerializer):
@@ -179,14 +179,14 @@ class ProductItemDetailSerializer(ProductItemSerializer):
             },
         }
 
+    def get_product_item_configuration(self, product_item) -> list[dict[str, str]]:
+        product_items = product_item.configuration.select_related("attribute")
+        return ConfigurationSerializer(instance=product_items, many=True).data
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation.move_to_end("product_item_configuration")
         return representation
-
-    def get_product_item_configuration(self, product_item):
-        product_items = product_item.configuration.select_related("attribute")
-        return ConfigurationSerializer(instance=product_items, many=True).data
 
 
 class ProductItemInProductSerializer(ProductItemDetailSerializer):
@@ -249,7 +249,7 @@ class ProductSerializer(serializers.ModelSerializer):
         method_name="get_absolute_url",
     )
 
-    def get_absolute_url(self, product):
+    def get_absolute_url(self, product) -> str:
         return reverse(
             viewname="products:product_detail_update_delete",
             request=self.context.get("request"),
@@ -369,7 +369,7 @@ class ProductDetailSerializer(ProductSerializer):
             },
         }
 
-    def get_brand_info(self, product):
+    def get_brand_info(self, product) -> dict | None:
         brand = product.brand
 
         if brand:
@@ -391,7 +391,7 @@ class ProductDetailSerializer(ProductSerializer):
         else:
             return None
 
-    def get_category_info(self, product):
+    def get_category_info(self, product) -> dict:
         category = product.category
         products_list_url = reverse(
             viewname="categories:category_products",

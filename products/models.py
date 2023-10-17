@@ -150,10 +150,10 @@ class Product(LifecycleModelMixin, ProductModelMixin, TimeStamp):
         ordering = ("-is_visible", "-is_available", "-id")
         db_table = "product"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse(
             viewname="products:product_detail_update_delete",
             kwargs={"category_id": self.category.id, "product_url": self.url},
@@ -225,10 +225,10 @@ class ProductItem(LifecycleModelMixin, ProductItemModelMixin, models.Model):
         ordering = ("-is_visible", "-is_available", "-id")
         db_table = "product_item"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.product} | {self.selling_price}"
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse(
             viewname="products:product_item_detail_update_delete",
             kwargs={"product_item_id": self.id},
@@ -269,10 +269,10 @@ class ProductMedia(LifecycleModelMixin, models.Model):
         ordering = ("-id",)
         db_table = "product_media"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.product} | {self.file}"
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse(
             viewname="products:product_media_detail_update_delete",
             kwargs={"product_media_id": self.id},
@@ -297,10 +297,10 @@ class Attribute(models.Model):
         ordering = ("name",)
         db_table = "attribute"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.category.full_name} - {self.name}"
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse(
             viewname="products:attribute_detail_update_delete",
             kwargs={"attribute_id": self.id},
@@ -353,7 +353,7 @@ class AttributeValue(models.Model):
         ordering = ("attribute",)
         db_table = "attribute_value"
 
-    def __str__(self):
+    def __str__(self) -> str:
         model_fields = self._meta.get_fields()
 
         for field in model_fields:
@@ -365,7 +365,7 @@ class AttributeValue(models.Model):
 
         return f"{self.attribute}: {field_value}"
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse(
             viewname="products:attribute_value_detail_update_delete",
             kwargs={"attribute_value_id": self.id},

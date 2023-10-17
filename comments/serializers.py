@@ -42,7 +42,7 @@ class CommentSerializer(serializers.ModelSerializer):
             },
         )
 
-    def get_liked_by_user(self, comment):
+    def get_liked_by_user(self, comment) -> bool:
         user = self.context["request"].user
         if user.is_authenticated:
             return comment.likes.filter(user=user).exists()

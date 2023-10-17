@@ -10,12 +10,12 @@ urlpatterns = [
         name="category_list_create",
     ),
     path(
-        route="categories/<category_id>/",
+        route="categories/<int:category_id>/",
         view=views.CategoryDetailUpdateDelete.as_view(),
         name="category_detail_update_delete",
     ),
     path(
-        route="categories/<category_id>/products/",
+        route="categories/<int:category_id>/products/",
         view=views.CategoryProductList.as_view(),
         name="category_products",
     ),

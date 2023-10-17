@@ -36,5 +36,5 @@ class Promotion(models.Model):
         ordering = ("-end_datetime",)
         db_table = "promotion"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name} - {self.discount_rate}%"
