@@ -6,7 +6,6 @@ from django.utils.translation import gettext_lazy as _
 from django_lifecycle import LifecycleModelMixin
 
 from core.models import TimeStamp
-from core.utils import product_directory_path
 
 from .managers import ProductManager
 from .modelmixins import ProductItemModelMixin, ProductModelMixin
@@ -26,6 +25,11 @@ class Product(LifecycleModelMixin, ProductModelMixin, TimeStamp):
         (AVAILABLE, _("موجود")),
         (UNAVAILABLE, _("ناموجود")),
     )
+
+    def product_directory_path(instance, filename):
+        category_name = instance.category.media_folder_name
+        product_name = instance.url.replace("-", " ").strip()
+        return f"products/{category_name}/{product_name}/{filename}"
 
     category = models.ForeignKey(
         verbose_name=_("دسته‌بندی"),
@@ -243,6 +247,11 @@ class ProductMedia(LifecycleModelMixin, models.Model):
         (IMAGE, _("عکس")),
         (VIDEO, _("فیلم")),
     )
+
+    def product_directory_path(instance, filename):
+        category_name = instance.product.category.media_folder_name
+        product_name = instance.product.url.replace("-", " ").strip()
+        return f"products/{category_name}/{product_name}/{filename}"
 
     product = models.ForeignKey(
         verbose_name=_("محصول"),
