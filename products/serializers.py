@@ -1,6 +1,9 @@
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
+from brands.serializers import BrandInfoSerializer
+from categories.serializers import CategoryInfoSerializer
+
 from .models import Attribute, AttributeValue, Product, ProductItem, ProductMedia
 
 
@@ -162,8 +165,10 @@ class ProductItemListSerializer(ProductItemSerializer):
 
 
 class ProductItemDetailSerializer(ProductItemSerializer):
-    product_item_configuration = serializers.SerializerMethodField(
-        method_name="get_product_item_configuration",
+    product_item_configuration = ConfigurationSerializer(
+        source="configuration",
+        many=True,
+        read_only=True,
     )
 
     class Meta:
@@ -178,10 +183,6 @@ class ProductItemDetailSerializer(ProductItemSerializer):
                 "write_only": True,
             },
         }
-
-    def get_product_item_configuration(self, product_item) -> list[dict[str, str]]:
-        product_items = product_item.configuration.select_related("attribute")
-        return ConfigurationSerializer(instance=product_items, many=True).data
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -231,17 +232,6 @@ class ProductMediaSerializer(serializers.ModelSerializer):
                 "write_only": True,
             },
         }
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        user = self.context["request"].user
-
-        if not user.is_staff:
-            representation.pop("id", None)
-            representation.pop("product_name", None)
-            representation.pop("absolute_url", None)
-
-        return representation
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -341,11 +331,13 @@ class ProductListSerializer(ProductSerializer):
 
 
 class ProductDetailSerializer(ProductSerializer):
-    brand_info = serializers.SerializerMethodField(
-        method_name="get_brand_info",
+    brand_info = BrandInfoSerializer(
+        source="brand",
+        read_only=True,
     )
-    category_info = serializers.SerializerMethodField(
-        method_name="get_category_info",
+    category_info = CategoryInfoSerializer(
+        source="category",
+        read_only=True,
     )
     media_files = ProductMediaSerializer(
         many=True,
@@ -367,46 +359,9 @@ class ProductDetailSerializer(ProductSerializer):
             "brand": {
                 "write_only": True,
             },
-        }
-
-    def get_brand_info(self, product) -> dict | None:
-        brand = product.brand
-
-        if brand:
-            products_list_url = reverse(
-                viewname="brands:brand_products",
-                request=self.context.get("request"),
-                kwargs={"brand_url": brand.url},
-            )
-            absolute_url = reverse(
-                viewname="brands:brand_detail_update_delete",
-                request=self.context.get("request"),
-                kwargs={"brand_url": brand.url},
-            )
-            return {
-                "name": brand.name,
-                "absolute_url": absolute_url,
-                "products_url": products_list_url,
-            }
-        else:
-            return None
-
-    def get_category_info(self, product) -> dict:
-        category = product.category
-        products_list_url = reverse(
-            viewname="categories:category_products",
-            request=self.context.get("request"),
-            kwargs={"category_id": category.id},
-        )
-        absolute_url = reverse(
-            viewname="categories:category_detail_update_delete",
-            request=self.context.get("request"),
-            kwargs={"category_id": category.id},
-        )
-        return {
-            "full_name": category.full_name,
-            "absolute_url": absolute_url,
-            "products_url": products_list_url,
+            "cheapest_product_item": {
+                "read_only": True,
+            },
         }
 
     def to_representation(self, instance):

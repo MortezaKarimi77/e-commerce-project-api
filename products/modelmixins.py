@@ -76,6 +76,17 @@ class ProductItemModelMixin:
         if self.inventory == 0:
             self.is_available = False
 
+    @hook(AFTER_SAVE)
+    @hook(AFTER_DELETE)
+    def clear_cache(self):
+        product = self.product
+
+        cache.delete(key="all_products")
+        cache.delete(key="visible_products")
+        cache.delete(key="product_items_queryset")
+        cache.delete(key=f"product_item_{self.id}")
+        cache.delete(key=f"product_{product.url}")
+
 
 class ProductMediaModelMixin:
     @hook(BEFORE_UPDATE, when="file", has_changed=True)

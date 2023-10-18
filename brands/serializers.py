@@ -59,3 +59,13 @@ class BrandDetailSerializer(BrandSerializer):
             representation.pop("update_datetime", None)
 
         return representation
+
+
+class BrandInfoSerializer(BrandSerializer):
+    class Meta:
+        model = Brand
+        fields = (
+            "name",
+            "absolute_url",
+            "products_url",
+        )

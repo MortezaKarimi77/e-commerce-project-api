@@ -112,3 +112,13 @@ class CategoryDetailSerializer(CategoryListSerializer):
         representation = super().to_representation(instance)
         representation.move_to_end(key="parent_category_info")
         return representation
+
+
+class CategoryInfoSerializer(CategorySerializer):
+    class Meta:
+        model = Category
+        fields = (
+            "full_name",
+            "absolute_url",
+            "products_url",
+        )

@@ -44,6 +44,15 @@ class ProductDetailUpdateDelete(ProductAPIViewMixin, RetrieveUpdateDestroyAPIVie
 
         return cached_object
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.prefetch_related(
+            "items",
+            "media_files",
+            "items__configuration__attribute",
+        )
+        return queryset
+
 
 class ProductItemListCreate(ProductItemAPIViewMixin, ListCreateAPIView):
     serializer_class = ProductItemListSerializer
@@ -56,6 +65,11 @@ class ProductItemDetailUpdateDelete(
     lookup_url_kwarg = "product_item_id"
     serializer_class = ProductItemDetailSerializer
     http_method_names = ("get", "patch", "delete")
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.prefetch_related("configuration__attribute")
+        return queryset
 
 
 class ProductMediaListCreate(ProductMediaAPIViewMixin, ListCreateAPIView):
