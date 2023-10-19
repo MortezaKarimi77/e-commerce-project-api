@@ -106,7 +106,7 @@ class ConfigurationSerializer(serializers.ModelSerializer):
         )
 
 
-class ProductItemSerializer(serializers.ModelSerializer):
+class ProductItemBaseSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(
         source="product.name",
         read_only=True,
@@ -131,7 +131,7 @@ class ProductItemSerializer(serializers.ModelSerializer):
         )
 
 
-class ProductItemListSerializer(ProductItemSerializer):
+class ProductItemListSerializer(ProductItemBaseSerializer):
     class Meta:
         model = ProductItem
         fields = (
@@ -164,7 +164,7 @@ class ProductItemListSerializer(ProductItemSerializer):
         }
 
 
-class ProductItemDetailSerializer(ProductItemSerializer):
+class ProductItemDetailSerializer(ProductItemBaseSerializer):
     product_item_configuration = ConfigurationSerializer(
         source="configuration",
         many=True,
@@ -234,7 +234,7 @@ class ProductMediaSerializer(serializers.ModelSerializer):
         }
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class ProductBaseSerializer(serializers.ModelSerializer):
     absolute_url = serializers.SerializerMethodField(
         method_name="get_absolute_url",
     )
@@ -247,7 +247,7 @@ class ProductSerializer(serializers.ModelSerializer):
         )
 
 
-class ProductListSerializer(ProductSerializer):
+class ProductListSerializer(ProductBaseSerializer):
     category_full_name = serializers.CharField(
         source="category.full_name",
         read_only=True,
@@ -330,7 +330,7 @@ class ProductListSerializer(ProductSerializer):
         }
 
 
-class ProductDetailSerializer(ProductSerializer):
+class ProductDetailSerializer(ProductBaseSerializer):
     brand_info = BrandInfoSerializer(
         source="brand",
         read_only=True,

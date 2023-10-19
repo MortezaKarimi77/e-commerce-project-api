@@ -3,7 +3,7 @@ from rest_framework import serializers
 from .models import Brand
 
 
-class BrandSerializer(serializers.ModelSerializer):
+class BrandBaseSerializer(serializers.ModelSerializer):
     absolute_url = serializers.HyperlinkedIdentityField(
         view_name="brands:brand_detail_update_delete",
         lookup_url_kwarg="brand_url",
@@ -16,7 +16,7 @@ class BrandSerializer(serializers.ModelSerializer):
     )
 
 
-class BrandListSerializer(BrandSerializer):
+class BrandListSerializer(BrandBaseSerializer):
     class Meta:
         model = Brand
         fields = (
@@ -45,7 +45,7 @@ class BrandListSerializer(BrandSerializer):
         }
 
 
-class BrandDetailSerializer(BrandSerializer):
+class BrandDetailSerializer(BrandBaseSerializer):
     class Meta:
         model = Brand
         fields = "__all__"
@@ -61,7 +61,7 @@ class BrandDetailSerializer(BrandSerializer):
         return representation
 
 
-class BrandInfoSerializer(BrandSerializer):
+class BrandInfoSerializer(BrandBaseSerializer):
     class Meta:
         model = Brand
         fields = (

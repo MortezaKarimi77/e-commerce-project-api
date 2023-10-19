@@ -5,7 +5,7 @@ from rest_framework.serializers import ValidationError
 from .models import Category
 
 
-class CategorySerializer(serializers.ModelSerializer):
+class CategoryBaseSerializer(serializers.ModelSerializer):
     absolute_url = serializers.HyperlinkedIdentityField(
         view_name="categories:category_detail_update_delete",
         lookup_url_kwarg="category_id",
@@ -46,7 +46,7 @@ class CategorySerializer(serializers.ModelSerializer):
         return super().validate(data)
 
 
-class ParentCategorySerializer(CategorySerializer):
+class ParentCategorySerializer(CategoryBaseSerializer):
     class Meta:
         model = Category
         fields = (
@@ -59,7 +59,7 @@ class ParentCategorySerializer(CategorySerializer):
         )
 
 
-class CategoryListSerializer(CategorySerializer):
+class CategoryListSerializer(CategoryBaseSerializer):
     parent_category_info = ParentCategorySerializer(
         source="parent_category",
         read_only=True,
@@ -97,7 +97,12 @@ class CategoryListSerializer(CategorySerializer):
         }
 
 
-class CategoryDetailSerializer(CategoryListSerializer):
+class CategoryDetailSerializer(CategoryBaseSerializer):
+    parent_category_info = ParentCategorySerializer(
+        source="parent_category",
+        read_only=True,
+    )
+
     class Meta:
         model = Category
         fields = "__all__"
@@ -114,7 +119,7 @@ class CategoryDetailSerializer(CategoryListSerializer):
         return representation
 
 
-class CategoryInfoSerializer(CategorySerializer):
+class CategoryInfoSerializer(CategoryBaseSerializer):
     class Meta:
         model = Category
         fields = (

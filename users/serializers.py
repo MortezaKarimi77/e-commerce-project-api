@@ -17,7 +17,7 @@ class TokenObtainPairSerializer(SimpleJwtTokenObtainPairSerializer):
         return data
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserBaseSerializer(serializers.ModelSerializer):
     absolute_url = serializers.HyperlinkedIdentityField(
         view_name="users:user_detail_update_delete",
         lookup_url_kwarg="username",
@@ -31,7 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class UserListSerializer(UserSerializer):
+class UserListSerializer(UserBaseSerializer):
     class Meta:
         model = User
         fields = (
@@ -47,6 +47,7 @@ class UserListSerializer(UserSerializer):
             "is_active",
             "absolute_url",
         )
+
         extra_kwargs = {
             "password": {
                 "write_only": True,
@@ -71,10 +72,11 @@ class UserListSerializer(UserSerializer):
         return user
 
 
-class PrivateUserDetailSerializer(UserSerializer):
+class PrivateUserDetailSerializer(UserBaseSerializer):
     class Meta:
         model = User
         fields = "__all__"
+
         extra_kwargs = {
             "password": {
                 "write_only": True,
@@ -87,7 +89,7 @@ class PrivateUserDetailSerializer(UserSerializer):
         return representation
 
 
-class PublicUserDetailSerializer(UserSerializer):
+class PublicUserDetailSerializer(UserBaseSerializer):
     class Meta:
         model = User
         fields = (
@@ -99,6 +101,7 @@ class PublicUserDetailSerializer(UserSerializer):
             "last_name",
             "absolute_url",
         )
+
         extra_kwargs = {
             "password": {
                 "write_only": True,

@@ -5,7 +5,7 @@ from rest_framework.reverse import reverse
 from .models import Comment, Like
 
 
-class CommentSerializer(serializers.ModelSerializer):
+class CommentBaseSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(
         source="user.get_full_name",
         read_only=True,
@@ -50,7 +50,7 @@ class CommentSerializer(serializers.ModelSerializer):
             return False
 
 
-class CommentListSerializer(CommentSerializer):
+class CommentListSerializer(CommentBaseSerializer):
     class Meta:
         model = Comment
         fields = (
@@ -90,7 +90,7 @@ class CommentListSerializer(CommentSerializer):
         }
 
 
-class CommentDetailSerializer(CommentSerializer):
+class CommentDetailSerializer(CommentBaseSerializer):
     class Meta:
         model = Comment
         fields = "__all__"
