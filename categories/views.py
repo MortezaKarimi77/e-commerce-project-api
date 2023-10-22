@@ -31,7 +31,6 @@ class CategoryProductList(ListAPIView):
     search_fields = ("name", "brand__name", "category__full_name")
 
     def get_queryset(self):
-        user = self.request.user
-        category_id = self.kwargs["category_id"]
+        user, category_id = self.request.user, self.kwargs["category_id"]
         queryset = Product.objects.category_products(category_id=category_id, user=user)
         return queryset

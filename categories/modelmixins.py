@@ -4,6 +4,8 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django_lifecycle import AFTER_DELETE, AFTER_SAVE, BEFORE_SAVE, hook
 
+from core import cache_key_schema
+
 
 class CategoryModelMixin:
     def validate_unique(self, exclude):
@@ -45,5 +47,9 @@ class CategoryModelMixin:
     @hook(AFTER_SAVE)
     @hook(AFTER_DELETE)
     def clear_cache(self):
-        cache.delete(key=f"category_{self.id}")
-        cache.delete(key="categories_queryset")
+        cache.delete_many(
+            keys=(
+                cache_key_schema.all_categories(),
+                cache_key_schema.single_category(self.id),
+            )
+        )
