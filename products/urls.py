@@ -15,6 +15,11 @@ urlpatterns = [
         name="product_detail_update_delete",
     ),
     path(
+        route="products/<int:category_id>/<slug:product_url>/comments/",
+        view=views.ProductCommentList.as_view(),
+        name="product_comments",
+    ),
+    path(
         route="product-items/",
         view=views.ProductItemListCreate.as_view(),
         name="product_item_list_create",

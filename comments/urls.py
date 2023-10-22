@@ -6,7 +6,7 @@ app_name = "comments"
 urlpatterns = [
     path(
         route="comments/",
-        view=views.CommentListCreate.as_view(),
+        view=views.PrivateCommentListCreate.as_view(),
         name="comment_list_create",
     ),
     path(

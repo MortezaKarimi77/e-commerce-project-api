@@ -20,9 +20,7 @@ class CommentAPIViewMixin:
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset = queryset.select_related("user", "product", "product__category")
         cache_key = "comments_queryset"
-
         cached_queryset = get_cached_queryset(queryset=queryset, cache_key=cache_key)
         return cached_queryset
 

@@ -1,7 +1,15 @@
 from django.core.cache import cache
 from django.shortcuts import get_object_or_404
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import (
+    ListAPIView,
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+)
 
+from comments.models import Comment
+from comments.serializers import CommentListSerializer
+
+from .models import Product
 from .serializers import (
     ProductDetailSerializer,
     ProductItemDetailSerializer,
@@ -51,6 +59,32 @@ class ProductDetailUpdateDelete(ProductAPIViewMixin, RetrieveUpdateDestroyAPIVie
             "media_files",
             "items__configuration__attribute",
         )
+        return queryset
+
+
+class ProductCommentList(ListAPIView):
+    serializer_class = CommentListSerializer
+
+    def get_object(self):
+        category_id = self.kwargs["category_id"]
+        product_url = self.kwargs["product_url"]
+        cache_key = f"product_{product_url}"
+
+        cached_object = cache.get(key=cache_key)
+        if cached_object is None:
+            product = get_object_or_404(
+                klass=Product, category__id=category_id, url=product_url
+            )
+            cached_object = cache.get_or_set(
+                key=cache_key, default=product, timeout=None
+            )
+
+        return cached_object
+
+    def get_queryset(self):
+        product = self.get_object()
+        user = self.request.user
+        queryset = Comment.objects.product_comments(user=user, product=product)
         return queryset
 
 

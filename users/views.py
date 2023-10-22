@@ -1,6 +1,15 @@
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from rest_framework.generics import (
+    ListAPIView,
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+)
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
+
+from comments.models import Comment
+from comments.serializers import CommentListSerializer
 
 from .permissions import IsUserOwner
 from .serializers import (
@@ -48,3 +57,16 @@ class UserDetailUpdateDelete(UserAPIViewMixin, RetrieveUpdateDestroyAPIView):
             return [permission() for permission in self.permission_classes["private"]]
         else:
             return [permission() for permission in self.permission_classes["public"]]
+
+
+@method_decorator(decorator=cache_page(timeout=60), name="dispatch")
+class UserCommentList(ListAPIView):
+    serializer_class = CommentListSerializer
+    permission_classes = (IsAuthenticated,)
+    ordering_fields = ("id",)
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Comment.objects.user_comments(user=user)
+        queryset = self.filter_queryset(queryset=queryset)
+        return queryset

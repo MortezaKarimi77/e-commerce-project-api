@@ -30,4 +30,9 @@ urlpatterns = [
         view=views.UserDetailUpdateDelete.as_view(),
         name="user_detail_update_delete",
     ),
+    path(
+        route="users/<str:username>/comments/",
+        view=views.UserCommentList.as_view(),
+        name="user_comments",
+    ),
 ]

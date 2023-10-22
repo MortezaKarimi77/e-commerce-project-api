@@ -13,9 +13,14 @@ from .serializers import CommentDetailSerializer, CommentListSerializer
 from .viewmixins import CommentAPIViewMixin, LikeAPIViewMixin
 
 
-class CommentListCreate(CommentAPIViewMixin, ListCreateAPIView):
+class PrivateCommentListCreate(CommentAPIViewMixin, ListCreateAPIView):
     serializer_class = CommentListSerializer
     permission_classes = (IsAdminOrWriteOnly,)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["is_for_admin_panel"] = True
+        return context
 
 
 class CommentDetailUpdateDelete(CommentAPIViewMixin, RetrieveUpdateDestroyAPIView):
