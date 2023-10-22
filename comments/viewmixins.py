@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 
+from core import cache_key_schema
 from core.utils import get_cached_object, get_cached_queryset
 
 from .models import Comment, Like
@@ -10,9 +11,7 @@ class CommentAPIViewMixin:
     queryset = Comment.objects.all()
 
     def get_object(self):
-        comment_id = self.kwargs["comment_id"]
-        cache_key = f"comment_{comment_id}"
-
+        cache_key = cache_key_schema.single_comment(self.kwargs["comment_id"])
         cached_object = get_cached_object(
             get_object_function=super().get_object, cache_key=cache_key
         )
@@ -20,7 +19,7 @@ class CommentAPIViewMixin:
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        cache_key = "comments_queryset"
+        cache_key = cache_key_schema.all_comments()
         cached_queryset = get_cached_queryset(queryset=queryset, cache_key=cache_key)
         return cached_queryset
 

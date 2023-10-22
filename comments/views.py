@@ -39,7 +39,6 @@ class LikeDelete(LikeAPIViewMixin, DestroyAPIView):
     permission_classes = (IsAdminOrOwner,)
 
     def get_object(self):
-        comment = super().get_object()
-        user = self.request.user
+        user, comment = self.request.user, super().get_object()
         like = get_object_or_404(klass=self.queryset, comment=comment, user=user)
         return like

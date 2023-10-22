@@ -9,6 +9,8 @@ from django_lifecycle import (
     hook,
 )
 
+from core import cache_key_schema
+
 
 class CommentModelMixin:
     @hook(BEFORE_CREATE)
@@ -32,8 +34,12 @@ class CommentModelMixin:
     @hook(AFTER_SAVE)
     @hook(AFTER_DELETE)
     def clear_cache(self):
-        cache.delete(key=f"comment_{self.id}")
-        cache.delete(key="comments_queryset")
+        cache.delete_many(
+            keys=(
+                cache_key_schema.all_comments(),
+                cache_key_schema.single_comment(self.id),
+            )
+        )
 
 
 class LikeModelMixin:
@@ -50,5 +56,9 @@ class LikeModelMixin:
     @hook(AFTER_SAVE)
     @hook(AFTER_DELETE)
     def clear_cache(self):
-        cache.delete(key=f"comment_{self.comment.id}")
-        cache.delete(key="comments_queryset")
+        cache.delete_many(
+            keys=(
+                cache_key_schema.all_comments(),
+                cache_key_schema.single_comment(self.comment.id),
+            )
+        )

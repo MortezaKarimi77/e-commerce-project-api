@@ -18,3 +18,14 @@ def all_categories() -> str:
 
 def single_category(category) -> str:
     return f"categories:{category}"
+
+
+# comments app cache keys
+
+
+def all_comments() -> str:
+    return "comments:all"
+
+
+def single_comment(comment) -> str:
+    return f"comments:{comment}"
