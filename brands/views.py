@@ -30,8 +30,6 @@ class BrandProductList(ListAPIView):
     search_fields = ("name", "brand__name", "category__full_name")
 
     def get_queryset(self):
-        user = self.request.user
-        brand_url = self.kwargs["brand_url"]
-
+        user, brand_url = self.request.user, self.kwargs["brand_url"]
         queryset = Product.objects.brand_products(brand_url=brand_url, user=user)
         return queryset
