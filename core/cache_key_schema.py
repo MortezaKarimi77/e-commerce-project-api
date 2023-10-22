@@ -29,3 +29,14 @@ def all_comments() -> str:
 
 def single_comment(comment) -> str:
     return f"comments:{comment}"
+
+
+# users app cache keys
+
+
+def all_users() -> str:
+    return "users:all"
+
+
+def single_user(user) -> str:
+    return f"users:{user}"
