@@ -238,6 +238,16 @@ class ProductBaseSerializer(serializers.ModelSerializer):
     absolute_url = serializers.SerializerMethodField(
         method_name="get_absolute_url",
     )
+    original_price = serializers.CharField(
+        source="cheapest_product_item.original_price",
+        default=None,
+        read_only=True,
+    )
+    selling_price = serializers.CharField(
+        source="cheapest_product_item.selling_price",
+        default=None,
+        read_only=True,
+    )
 
     def get_absolute_url(self, product) -> str:
         return reverse(
@@ -254,14 +264,6 @@ class ProductListSerializer(ProductBaseSerializer):
     )
     brand_name = serializers.CharField(
         source="brand.name",
-        read_only=True,
-    )
-    original_price = serializers.CharField(
-        source="cheapest_product_item.original_price",
-        read_only=True,
-    )
-    selling_price = serializers.CharField(
-        source="cheapest_product_item.selling_price",
         read_only=True,
     )
 

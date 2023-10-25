@@ -4,6 +4,8 @@ from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView,
 )
 
+from core import cache_key_schema
+from core.utils import get_cached_queryset
 from products.models import Product
 from products.serializers import ProductListSerializer
 
@@ -32,5 +34,15 @@ class CategoryProductList(ListAPIView):
 
     def get_queryset(self):
         user, category_id = self.request.user, self.kwargs["category_id"]
-        queryset = Product.objects.category_products(category_id=category_id, user=user)
-        return queryset
+
+        if user.is_staff:
+            queryset = Product.objects.category_all_products(category_id)
+            queryset = self.filter_queryset(queryset=queryset)
+            cache_key = cache_key_schema.category_all_products(category_id)
+        else:
+            queryset = Product.objects.category_visible_products(category_id)
+            queryset = self.filter_queryset(queryset=queryset)
+            cache_key = cache_key_schema.category_visible_products(category_id)
+
+        cached_queryset = get_cached_queryset(queryset=queryset, cache_key=cache_key)
+        return cached_queryset

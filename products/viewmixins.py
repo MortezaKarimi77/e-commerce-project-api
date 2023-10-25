@@ -1,5 +1,6 @@
 from rest_framework.permissions import IsAdminUser
 
+from core import cache_key_schema
 from core.permissions import IsAdminOrReadOnly
 from core.utils import get_cached_object, get_cached_queryset
 
@@ -12,12 +13,21 @@ from .serializers import (
 
 
 class ProductAPIViewMixin:
+    queryset = Product.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_queryset(self):
-        user = self.request.user
-        queryset = Product.objects.products_list(user=user)
-        return queryset
+        user, queryset = self.request.user, super().get_queryset()
+
+        if user.is_staff:
+            cache_key = cache_key_schema.all_products()
+        else:
+            queryset = Product.objects.visible_products()
+            queryset = self.filter_queryset(queryset=queryset)
+            cache_key = cache_key_schema.visible_products()
+
+        cached_queryset = get_cached_queryset(queryset=queryset, cache_key=cache_key)
+        return cached_queryset
 
 
 class ProductItemAPIViewMixin:
@@ -25,9 +35,7 @@ class ProductItemAPIViewMixin:
     permission_classes = (IsAdminUser,)
 
     def get_object(self):
-        product_item_id = self.kwargs["product_item_id"]
-        cache_key = f"product_item_{product_item_id}"
-
+        cache_key = cache_key_schema.single_product_item(self.kwargs["product_item_id"])
         cached_object = get_cached_object(
             get_object_function=super().get_object, cache_key=cache_key
         )
@@ -35,7 +43,7 @@ class ProductItemAPIViewMixin:
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        cache_key = "product_items_queryset"
+        cache_key = cache_key_schema.all_product_items()
         cached_queryset = get_cached_queryset(queryset=queryset, cache_key=cache_key)
         return cached_queryset
 

@@ -40,3 +40,42 @@ def all_users() -> str:
 
 def single_user(user) -> str:
     return f"users:{user}"
+
+
+# products app cache keys
+
+
+def all_products() -> str:
+    return "products:all"
+
+
+def visible_products() -> str:
+    return "products:visible"
+
+
+def single_product(product) -> str:
+    return f"products:{product}"
+
+
+def category_all_products(category) -> str:
+    return f"categories:{category}:products:all"
+
+
+def category_visible_products(category) -> str:
+    return f"categories:{category}:products:visible"
+
+
+def brand_all_products(brand) -> str:
+    return f"brands:{brand}:products:all"
+
+
+def brand_visible_products(brand) -> str:
+    return f"brands:{brand}:products:visible"
+
+
+def all_product_items() -> str:
+    return "product-items:all"
+
+
+def single_product_item(product_item) -> str:
+    return f"product-items:{product_item}"

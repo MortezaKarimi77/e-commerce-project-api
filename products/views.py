@@ -8,6 +8,7 @@ from rest_framework.generics import (
 
 from comments.models import Comment
 from comments.serializers import CommentListSerializer
+from core import cache_key_schema
 
 from .models import Product
 from .serializers import (
@@ -38,7 +39,7 @@ class ProductDetailUpdateDelete(ProductAPIViewMixin, RetrieveUpdateDestroyAPIVie
     def get_object(self):
         category_id = self.kwargs["category_id"]
         product_url = self.kwargs["product_url"]
-        cache_key = f"product_{product_url}"
+        cache_key = cache_key_schema.single_product(product_url)
 
         cached_object = cache.get(key=cache_key)
         if cached_object is None:
@@ -68,7 +69,7 @@ class ProductCommentList(ListAPIView):
     def get_object(self):
         category_id = self.kwargs["category_id"]
         product_url = self.kwargs["product_url"]
-        cache_key = f"product_{product_url}"
+        cache_key = cache_key_schema.single_product(product_url)
 
         cached_object = cache.get(key=cache_key)
         if cached_object is None:
@@ -82,8 +83,7 @@ class ProductCommentList(ListAPIView):
         return cached_object
 
     def get_queryset(self):
-        product = self.get_object()
-        user = self.request.user
+        user, product = self.request.user, self.get_object()
         queryset = Comment.objects.product_comments(user=user, product=product)
         return queryset
 
@@ -95,9 +95,9 @@ class ProductItemListCreate(ProductItemAPIViewMixin, ListCreateAPIView):
 class ProductItemDetailUpdateDelete(
     ProductItemAPIViewMixin, RetrieveUpdateDestroyAPIView
 ):
+    serializer_class = ProductItemDetailSerializer
     lookup_field = "id"
     lookup_url_kwarg = "product_item_id"
-    serializer_class = ProductItemDetailSerializer
     http_method_names = ("get", "patch", "delete")
 
     def get_queryset(self):

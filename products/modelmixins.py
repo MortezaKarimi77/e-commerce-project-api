@@ -9,6 +9,8 @@ from django_lifecycle import (
     hook,
 )
 
+from core import cache_key_schema
+
 
 class ProductModelMixin:
     @hook(BEFORE_SAVE)
@@ -47,16 +49,18 @@ class ProductModelMixin:
     @hook(AFTER_SAVE)
     @hook(AFTER_DELETE)
     def clear_cache(self):
-        category = self.category
-        brand = self.brand
-
-        cache.delete(key="all_products")
-        cache.delete(key="visible_products")
-        cache.delete(key=f"product_{self.url}")
-        cache.delete(key=f"category_{category.id}_all_products")
-        cache.delete(key=f"category_{category.id}_visible_products")
-        cache.delete(key=f"brand_{brand.url if brand else None}_all_products")
-        cache.delete(key=f"brand_{brand.url if brand else None}_visible_products")
+        category, brand = self.category, self.brand
+        cache.delete_many(
+            keys=(
+                cache_key_schema.all_products(),
+                cache_key_schema.visible_products(),
+                cache_key_schema.single_product(self.url),
+                cache_key_schema.category_all_products(category.id),
+                cache_key_schema.category_visible_products(category.id),
+                cache_key_schema.brand_all_products(brand.url if brand else None),
+                cache_key_schema.brand_visible_products(brand.url if brand else None),
+            )
+        )
 
 
 class ProductItemModelMixin:
@@ -80,12 +84,15 @@ class ProductItemModelMixin:
     @hook(AFTER_DELETE)
     def clear_cache(self):
         product = self.product
-
-        cache.delete(key="all_products")
-        cache.delete(key="visible_products")
-        cache.delete(key="product_items_queryset")
-        cache.delete(key=f"product_item_{self.id}")
-        cache.delete(key=f"product_{product.url}")
+        cache.delete_many(
+            keys=(
+                cache_key_schema.all_product_items(),
+                cache_key_schema.single_product_item(self.id),
+                cache_key_schema.all_products(),
+                cache_key_schema.visible_products(),
+                cache_key_schema.single_product(product.url),
+            )
+        )
 
 
 class ProductMediaModelMixin:
