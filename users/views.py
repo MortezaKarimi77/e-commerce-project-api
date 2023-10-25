@@ -63,7 +63,7 @@ class UserDetailUpdateDelete(UserAPIViewMixin, RetrieveUpdateDestroyAPIView):
 class UserCommentList(ListAPIView):
     serializer_class = CommentListSerializer
     permission_classes = (IsAuthenticated,)
-    ordering_fields = ("id",)
+    ordering_fields = ("id", "likes_count", "published")
 
     def get_queryset(self):
         user = self.request.user

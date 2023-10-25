@@ -65,6 +65,7 @@ class ProductDetailUpdateDelete(ProductAPIViewMixin, RetrieveUpdateDestroyAPIVie
 
 class ProductCommentList(ListAPIView):
     serializer_class = CommentListSerializer
+    ordering_fields = ('id', 'likes_count', 'is_buyer')
 
     def get_object(self):
         category_id = self.kwargs["category_id"]
