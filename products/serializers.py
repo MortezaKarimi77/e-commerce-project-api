@@ -238,6 +238,9 @@ class ProductBaseSerializer(serializers.ModelSerializer):
     absolute_url = serializers.SerializerMethodField(
         method_name="get_absolute_url",
     )
+    comments_url = serializers.SerializerMethodField(
+        method_name="get_comments_url",
+    )
     original_price = serializers.CharField(
         source="cheapest_product_item.original_price",
         default=None,
@@ -252,6 +255,13 @@ class ProductBaseSerializer(serializers.ModelSerializer):
     def get_absolute_url(self, product) -> str:
         return reverse(
             viewname="products:product_detail_update_delete",
+            request=self.context.get("request"),
+            kwargs={"category_id": product.category.id, "product_url": product.url},
+        )
+
+    def get_comments_url(self, product) -> str:
+        return reverse(
+            viewname="products:product_comments",
             request=self.context.get("request"),
             kwargs={"category_id": product.category.id, "product_url": product.url},
         )
@@ -290,6 +300,7 @@ class ProductListSerializer(ProductBaseSerializer):
             "other_description",
             "rating",
             "absolute_url",
+            "comments_url",
             "main_image",
             "original_price",
             "selling_price",
@@ -374,6 +385,7 @@ class ProductDetailSerializer(ProductBaseSerializer):
         representation.move_to_end("update_datetime")
         representation.move_to_end("main_image")
         representation.move_to_end("absolute_url")
+        representation.move_to_end("comments_url")
         representation.move_to_end("brand_info")
         representation.move_to_end("category_info")
         representation.move_to_end("media_files")
