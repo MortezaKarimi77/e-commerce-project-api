@@ -16,6 +16,7 @@ from .viewmixins import CommentAPIViewMixin, LikeAPIViewMixin
 class PrivateCommentListCreate(CommentAPIViewMixin, ListCreateAPIView):
     serializer_class = CommentListSerializer
     permission_classes = (IsAdminOrWriteOnly,)
+    filterset_fields = ("user__username", "published")
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
