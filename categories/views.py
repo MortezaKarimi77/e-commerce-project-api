@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework.generics import (
     ListAPIView,
     ListCreateAPIView,
@@ -5,6 +7,7 @@ from rest_framework.generics import (
 )
 
 from core import cache_key_schema
+from core.cache_key_schema import categories_key_prefix
 from core.utils import get_cached_queryset
 from products.models import Product
 from products.serializers import ProductListSerializer
@@ -19,12 +22,24 @@ class CategoryListCreate(CategoryAPIViewMixin, ListCreateAPIView):
     ordering_fields = ("id", "name")
     search_fields = ("name",)
 
+    @method_decorator(
+        decorator=cache_page(timeout=None, key_prefix=categories_key_prefix()),
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 class CategoryDetailUpdateDelete(CategoryAPIViewMixin, RetrieveUpdateDestroyAPIView):
     serializer_class = CategoryDetailSerializer
     lookup_field = "id"
     lookup_url_kwarg = "category_id"
     http_method_names = ("get", "patch", "delete")
+
+    @method_decorator(
+        decorator=cache_page(timeout=None, key_prefix=categories_key_prefix()),
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
 
 class CategoryProductList(ListAPIView):

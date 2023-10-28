@@ -12,12 +12,12 @@ def brands_key_prefix() -> str:
 # categories app cache keys
 
 
-def all_categories() -> str:
-    return "categories:all"
+def categories_pattern() -> str:
+    return "*categories*"
 
 
-def single_category(category) -> str:
-    return f"categories:{category}"
+def categories_key_prefix() -> str:
+    return "categories"
 
 
 # comments app cache keys

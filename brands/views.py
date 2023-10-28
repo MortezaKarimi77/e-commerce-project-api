@@ -23,7 +23,6 @@ class BrandListCreate(BrandAPIViewMixin, ListCreateAPIView):
 
     @method_decorator(
         decorator=cache_page(timeout=None, key_prefix=brands_key_prefix()),
-        name="list",
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
