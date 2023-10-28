@@ -10,8 +10,19 @@ class CommentManager(models.Manager):
         queryset = queryset.select_related("user", "product", "product__category")
         return queryset
 
-    def product_comments(self, user, product):
+    def all_product_comments(self, user, product):
         queryset = self.filter(product=product)
+
+        if user.is_authenticated:
+            from .models import Like
+
+            likes = Like.objects.filter(user=user, comment=OuterRef("id"))
+            queryset = queryset.annotate(liked_by_user=Exists(likes))
+
+        return queryset
+
+    def published_product_comments(self, user, product):
+        queryset = self.filter(product=product, published=True)
 
         if user.is_authenticated:
             from .models import Like
