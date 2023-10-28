@@ -1,12 +1,12 @@
 # brands app cache keys
 
 
-def all_brands() -> str:
-    return "brands:all"
+def brands_pattern() -> str:
+    return "*brands*"
 
 
-def single_brand(brand) -> str:
-    return f"brands:{brand}"
+def brands_key_prefix() -> str:
+    return "brands"
 
 
 # categories app cache keys

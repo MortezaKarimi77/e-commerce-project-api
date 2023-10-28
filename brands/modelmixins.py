@@ -2,7 +2,7 @@ from django.core.cache import cache
 from django.utils.text import slugify
 from django_lifecycle import AFTER_DELETE, AFTER_SAVE, BEFORE_SAVE, BEFORE_UPDATE, hook
 
-from core import cache_key_schema
+from core.cache_key_schema import brands_pattern
 
 
 class BrandModelMixin:
@@ -26,9 +26,4 @@ class BrandModelMixin:
     @hook(AFTER_SAVE)
     @hook(AFTER_DELETE)
     def clear_cache(self):
-        cache.delete_many(
-            keys=(
-                cache_key_schema.all_brands(),
-                cache_key_schema.single_brand(self.url),
-            )
-        )
+        cache.delete_pattern(pattern=brands_pattern())

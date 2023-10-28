@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework.generics import (
     ListAPIView,
     ListCreateAPIView,
@@ -5,6 +7,7 @@ from rest_framework.generics import (
 )
 
 from core import cache_key_schema
+from core.cache_key_schema import brands_key_prefix
 from core.utils import get_cached_queryset
 from products.models import Product
 from products.serializers import ProductListSerializer
@@ -18,6 +21,13 @@ class BrandListCreate(BrandAPIViewMixin, ListCreateAPIView):
     ordering_fields = ("id", "name", "country")
     search_fields = ("name", "country")
 
+    @method_decorator(
+        decorator=cache_page(timeout=None, key_prefix=brands_key_prefix()),
+        name="list",
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 class BrandDetailUpdateDelete(BrandAPIViewMixin, RetrieveUpdateDestroyAPIView):
     serializer_class = BrandDetailSerializer
@@ -25,11 +35,20 @@ class BrandDetailUpdateDelete(BrandAPIViewMixin, RetrieveUpdateDestroyAPIView):
     lookup_url_kwarg = "brand_url"
     http_method_names = ("get", "patch", "delete")
 
+    @method_decorator(
+        decorator=cache_page(timeout=None, key_prefix=brands_key_prefix()),
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
 
 class BrandProductList(ListAPIView):
     serializer_class = ProductListSerializer
     ordering_fields = ("id", "rating", "cheapest_product_item__selling_price")
     search_fields = ("name", "brand__name", "category__full_name")
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def get_queryset(self):
         user, brand_url = self.request.user, self.kwargs["brand_url"]
