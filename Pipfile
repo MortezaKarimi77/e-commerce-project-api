@@ -12,6 +12,7 @@ djangorestframework-simplejwt = "*"
 pillow = "*"
 drf-spectacular = "*"
 django-lifecycle = "*"
+django-redis = "*"
 
 [dev-packages]
 django-debug-toolbar = "*"
