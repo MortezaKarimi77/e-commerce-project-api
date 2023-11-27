@@ -10,6 +10,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from comments.models import Comment
 from comments.serializers import CommentListSerializer
+from core.cache_key_schema import users_key_prefix
 
 from .permissions import IsUserOwner
 from .serializers import (
@@ -33,6 +34,12 @@ class UserListCreate(UserAPIViewMixin, ListCreateAPIView):
     permission_classes = (IsAdminUser,)
     ordering_fields = ("id", "is_staff", "is_active")
     search_fields = ("username", "email", "first_name", "last_name")
+
+    @method_decorator(
+        decorator=cache_page(timeout=None, key_prefix=users_key_prefix()),
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class UserDetailUpdateDelete(UserAPIViewMixin, RetrieveUpdateDestroyAPIView):
@@ -59,15 +66,17 @@ class UserDetailUpdateDelete(UserAPIViewMixin, RetrieveUpdateDestroyAPIView):
             return [permission() for permission in self.permission_classes["public"]]
 
 
-@method_decorator(decorator=cache_page(timeout=60), name="dispatch")
 class UserCommentList(ListAPIView):
     serializer_class = CommentListSerializer
     permission_classes = (IsAuthenticated,)
     ordering_fields = ("id", "likes_count", "published")
     filterset_fields = ("published",)
 
+    @method_decorator(decorator=cache_page(timeout=60))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     def get_queryset(self):
         user = self.request.user
         queryset = Comment.objects.user_comments(user=user)
-        queryset = self.filter_queryset(queryset=queryset)
         return queryset

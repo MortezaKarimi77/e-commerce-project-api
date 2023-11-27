@@ -34,8 +34,12 @@ def single_comment(comment) -> str:
 # users app cache keys
 
 
-def all_users() -> str:
-    return "users:all"
+def users_pattern() -> str:
+    return "*.users.*"
+
+
+def users_key_prefix() -> str:
+    return "users"
 
 
 def single_user(user) -> str:
